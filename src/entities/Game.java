@@ -4,6 +4,15 @@ import java.sql.Date;
 import java.time.LocalTime;
 
 public class Game {
+    public int getIdGame() {
+        return idGame;
+    }
+
+    public void setIdGame(int idGame) {
+        this.idGame = idGame;
+    }
+
+    private int idGame;
     private Map map;
     private Date startDate;
     private LocalTime duration;

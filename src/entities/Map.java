@@ -1,6 +1,7 @@
 package entities;
 
 public class Map {
+    private int idMap;
     private String name;
     private int capacity;
     private double pricePerHour;
@@ -11,6 +12,14 @@ public class Map {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
+    }
+
+    public int getIdMap() {
+        return idMap;
+    }
+
+    public void setIdMap(int idMap) {
+        this.idMap = idMap;
     }
 
     public double getPricePerHour() {
