@@ -1,14 +1,24 @@
 package entities;
 
-import java.sql.Date;
+import entities.base.Entity;
+import entities.base.annotations.Field;
+import entities.base.annotations.PrimaryKey;
+import entities.base.annotations.Table;
 
-public class Client {
-    private int idClient;
+import java.sql.Timestamp;
+
+@Table("CLIENTS")
+public class Client extends Entity<Client> {
+    @PrimaryKey("id_client")
+    private long idClient;
+    @Field("full_name")
     private String fullName;
-    private Date birthday;
-    private int gamesCount;
+    @Field("birthday")
+    private Timestamp birthday;
+    @Field("games_count")
+    private long gamesCount;
 
-    public int getIdClient() {
+    public long getIdClient() {
         return idClient;
     }
 
@@ -20,6 +30,16 @@ public class Client {
         this.gamesCount = gamesCount;
     }
 
+    @Override
+    public String toString() {
+        return "Client{" +
+                "idClient=" + idClient +
+                ", fullName='" + fullName + '\'' +
+                ", birthday=" + birthday +
+                ", gamesCount=" + gamesCount +
+                '}';
+    }
+
     public String getFullName() {
         return fullName;
     }
@@ -28,19 +48,19 @@ public class Client {
         this.fullName = fullName;
     }
 
-    public Date getBirthday() {
+    public Timestamp getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(Timestamp birthday) {
         this.birthday = birthday;
     }
 
-    public Integer getGamesCount() {
+    public long getGamesCount() {
         return gamesCount;
     }
 
-    public void setGamesCount(Integer gamesCount) {
+    public void setGamesCount(long gamesCount) {
         this.gamesCount = gamesCount;
     }
 }
