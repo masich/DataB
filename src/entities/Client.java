@@ -5,7 +5,7 @@ import java.sql.Date;
 public class Client {
     private String fullName;
     private Date birthday;
-    private Integer gamesCount;
+    private int gamesCount;
 
     public String getFullName() {
         return fullName;
