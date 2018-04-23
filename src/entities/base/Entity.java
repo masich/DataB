@@ -15,9 +15,8 @@ abstract public class Entity<T extends Entity> {
 //    }
 
     //Todo: refactor me
-    public final T getById(@NotNull Object id) {
+    public static <T> T getById(@NotNull Object id, @NotNull Class<T> entityClass) {
         try {
-            Class<T> entityClass = (Class<T>) this.getClass();
             String tableName = entityClass.getAnnotation(Table.class).value();
             String primaryKey = null;
 
@@ -54,11 +53,19 @@ abstract public class Entity<T extends Entity> {
             }
             return entity;
         } catch (Exception e) {
-            e.printStackTrace();
+            //Todo: logging an exception
+//            e.printStackTrace();
             return null;
         }
     }
-//
+
+
+    //Fixme: unchecked cast
+    public final T getById(@NotNull Object id) {
+        Class<T> entityClass = (Class<T>) this.getClass();
+        return getById(id, entityClass);
+    }
+
 //    public boolean save() {
 //
 //    }
