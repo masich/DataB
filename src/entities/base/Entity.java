@@ -66,13 +66,50 @@ abstract public class Entity<T extends Entity> {
         return getById(id, entityClass);
     }
 
-//    public boolean save() {
+    //    public boolean save() {
 //
 //    }
 //
-//    public boolean delete() {
-//
-//    }
+
+    /**
+     * Deletes an instance from appropriate database table.
+     * <p>
+     * Deletes an instance with the same primary key from appropriate
+     * database table.
+     *
+     * @return <code>true</code> if entity was successfully deletedж otherwise <code>false</code>.
+     */
+    //Todo: refactor me
+    public boolean delete() {
+        try {
+            Class<T> entityClass = (Class<T>) this.getClass();
+            String tableName = entityClass.getAnnotation(Table.class).value();
+            String primaryKey = null;
+            Object primaryKeyValue = null;
+
+            java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
+            for (java.lang.reflect.Field field : entityFields) {
+                PrimaryKey primaryKeyAnnotation = field.getAnnotation(PrimaryKey.class);
+                if (primaryKeyAnnotation != null) {
+                    field.setAccessible(true);
+                    primaryKey = primaryKeyAnnotation.value();
+                    primaryKeyValue = field.get(this);
+                    break;
+                }
+            }
+            if (primaryKey == null) {
+                return false;
+            }
+            int deleted = DBManager.getInstance().getConnection().createStatement()
+                    .executeUpdate("DELETE  FROM " + tableName
+                            + " WHERE " + tableName + "." + primaryKey + " = " + primaryKeyValue);
+            return deleted > 0;
+        } catch (Exception e) {
+            //Todo: logging an exception
+            e.printStackTrace();
+            return false;
+        }
+    }
 //
 //    public boolean update() {
 //
