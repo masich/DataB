@@ -8,19 +8,19 @@ import entities.base.annotations.Table;
 @Table("DISCOUNTS")
 public class Discount extends Entity<Discount> {
     @PrimaryKey("id_discount")
-    private long idDiscount;
+    private Long idDiscount;
     @Field("name")
     private String name;
     @Field("percent")
-    private long percent;
+    private Integer percent;
     @Field("games_count")
-    private long gamesCount;
+    private Integer gamesCount;
 
-    public long getIdDiscount() {
+    public Long getIdDiscount() {
         return idDiscount;
     }
 
-    public void setIdDiscount(long idDiscount) {
+    public void setIdDiscount(Long idDiscount) {
         this.idDiscount = idDiscount;
     }
 
@@ -32,19 +32,19 @@ public class Discount extends Entity<Discount> {
         this.name = name;
     }
 
-    public long getPercent() {
+    public Integer getPercent() {
         return percent;
     }
 
-    public void setPercent(int percent) {
+    public void setPercent(Integer percent) {
         this.percent = percent;
     }
 
-    public long getGamesCount() {
+    public Integer getGamesCount() {
         return gamesCount;
     }
 
-    public void setGamesCount(int gamesCount) {
+    public void setGamesCount(Integer gamesCount) {
         this.gamesCount = gamesCount;
     }
 

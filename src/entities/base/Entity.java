@@ -1,13 +1,16 @@
 package entities.base;
 
+import com.sun.istack.internal.NotNull;
 import entities.base.annotations.Field;
 import entities.base.annotations.ForeignKey;
 import entities.base.annotations.PrimaryKey;
 import entities.base.annotations.Table;
-import org.jetbrains.annotations.NotNull;
+//import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +58,62 @@ abstract public class Entity<T extends Entity> {
         }
     }
 
+    public static <T> boolean deleteAll(@NotNull Class<T> entityClass) {
+        boolean result = false;
+        try {
+            String tableName = entityClass.getAnnotation(Table.class).value();
+            DBManager.getInstance().getConnection().createStatement()
+                    .execute("DELETE FROM " + tableName);
+            result = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static <T> boolean update(T obj) throws IllegalAccessException {
+        boolean result = false;
+
+        Class<T> entityClass = (Class<T>) obj.getClass();
+        String tableName = entityClass.getAnnotation(Table.class).value();
+
+        java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
+
+        StringBuilder query = new StringBuilder("UPDATE " + tableName + " SET ");
+
+        java.lang.reflect.Field primary = null;
+        String id = null;
+
+        for (java.lang.reflect.Field field : entityFields) {
+            field.setAccessible(true);
+            for (Annotation annotation : field.getDeclaredAnnotations()) {
+                if (annotation instanceof Field)
+                    query.append(tableName + "." + ((Field) annotation).value() + " = '" + field.get(obj).toString() + "', ");
+                if (annotation instanceof PrimaryKey) {
+                    primary = field;
+                    id = ((PrimaryKey) annotation).value();
+                }
+            }
+        }
+
+        query.deleteCharAt(query.lastIndexOf(","))
+                .append(" WHERE " + tableName + "." + id + " = '" + primary.get(obj) + "'");
+
+
+        try {
+            result = DBManager.getInstance()
+                    .getConnection()
+                    .createStatement()
+                    .execute(query.toString());
+            result = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+
     //Todo: refactor me
     public static <T> T getById(@NotNull Object id, @NotNull Class<T> entityClass) {
         try {
@@ -95,7 +154,7 @@ abstract public class Entity<T extends Entity> {
             return entity;
         } catch (Exception e) {
             //Todo: logging an exception
-//            e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }

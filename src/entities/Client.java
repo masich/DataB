@@ -22,12 +22,8 @@ public class Client extends Entity<Client> {
         return idClient;
     }
 
-    public void setIdClient(int idClient) {
+    public void setIdClient(long idClient) {
         this.idClient = idClient;
-    }
-
-    public void setGamesCount(int gamesCount) {
-        this.gamesCount = gamesCount;
     }
 
     @Override

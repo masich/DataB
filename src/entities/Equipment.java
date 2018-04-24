@@ -1,17 +1,17 @@
 package entities;
 
 public class Equipment {
-    private int idEquip;
+    private Long idEquip;
     private String name;
-    private int price;
-    private int totalCount;
-    private int freeCount;
+    private Double price;
+    private Integer totalCount;
+    private Integer freeCount;
 
-    public int getIdEquip() {
+    public Long getIdEquip() {
         return idEquip;
     }
 
-    public void setIdEquip(int idEquip) {
+    public void setIdEquip(Long idEquip) {
         this.idEquip = idEquip;
     }
 
@@ -23,27 +23,27 @@ public class Equipment {
         this.name = name;
     }
 
-    public int getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public int getTotalCount() {
+    public Integer getTotalCount() {
         return totalCount;
     }
 
-    public void setTotalCount(int totalCount) {
+    public void setTotalCount(Integer totalCount) {
         this.totalCount = totalCount;
     }
 
-    public int getFreeCount() {
+    public Integer getFreeCount() {
         return freeCount;
     }
 
-    public void setFreeCount(int freeCount) {
+    public void setFreeCount(Integer freeCount) {
         this.freeCount = freeCount;
     }
 }

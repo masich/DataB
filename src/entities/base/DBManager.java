@@ -1,6 +1,6 @@
 package entities.base;
 
-import info.KeyStore;
+import test.KeyStore;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

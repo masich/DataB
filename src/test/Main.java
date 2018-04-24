@@ -2,7 +2,7 @@ package test;
 
 import entities.Client;
 import entities.base.annotations.Table;
-import info.KeyStore;
+
 
 import java.lang.reflect.Field;
 
@@ -10,8 +10,16 @@ import java.sql.*;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
-        Client client = new Client();
-        ResultSet rs = null;
+
+        Client client = Client.getById(3,Client.class);
+        client.setFullName("LOXssbf");
+        try {
+            System.out.println(Client.update(client));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+       /* ResultSet rs = null;
         Connection conn = null;
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -45,6 +53,6 @@ public class Main {
             System.out.println(client);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

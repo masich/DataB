@@ -1,32 +1,32 @@
 package entities;
 
 public class Map {
-    private int idMap;
+    private Long idMap;
     private String name;
-    private int capacity;
-    private double pricePerHour;
+    private Integer capacity;
+    private Double pricePerHour;
 
-    public int getCapacity() {
+    public Integer getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
+    public void setCapacity(Integer capacity) {
         this.capacity = capacity;
     }
 
-    public int getIdMap() {
+    public Long getIdMap() {
         return idMap;
     }
 
-    public void setIdMap(int idMap) {
+    public void setIdMap(Long idMap) {
         this.idMap = idMap;
     }
 
-    public double getPricePerHour() {
+    public Double getPricePerHour() {
         return pricePerHour;
     }
 
-    public void setPricePerHour(double pricePerHour) {
+    public void setPricePerHour(Double pricePerHour) {
         this.pricePerHour = pricePerHour;
     }
 
