@@ -8,11 +8,52 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 abstract public class Entity<T extends Entity> {
-//    public List<T> getAll() {
-//
-//    }
+    /**
+     * Returns all of the <code>entityClass</code> entities from the
+     * appropriate database table.
+     *
+     * @param entityClass class of the database table entity.
+     * @param <T>         type of the result value. The type of <code>entityClass</code> in this case.
+     * @return all of the entities of the appropriate database table,
+     * emptyList if the database table is empty,
+     * <code>null</code> if something went wrong.
+     */
+    //Todo: extract boilerplate code into external methods
+    public static <T> List<T> getAll(@NotNull Class<T> entityClass) {
+        try {
+            String tableName = entityClass.getAnnotation(Table.class).value();
+            java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
+            ResultSet entityResultSet;
+            entityResultSet = DBManager.getInstance().getConnection().createStatement()
+                    .executeQuery("SELECT  *  FROM " + tableName);
+            List<T> allEntities = new ArrayList<>();
+            while (entityResultSet.next()) {
+                T entity = entityClass.getDeclaredConstructor().newInstance();
+                for (java.lang.reflect.Field field : entityFields) {
+                    field.setAccessible(true);
+                    for (Annotation annotation : field.getDeclaredAnnotations()) {
+                        if (annotation instanceof PrimaryKey) {
+                            field.set(entity, entityResultSet.getObject(((PrimaryKey) annotation).value()));
+                        } else if (annotation instanceof ForeignKey) {
+                            field.set(entity, entityResultSet.getObject(((ForeignKey) annotation).value()));
+                        } else if (annotation instanceof Field) {
+                            field.set(entity, entityResultSet.getObject(((Field) annotation).value()));
+                        }
+                    }
+                }
+                allEntities.add(entity);
+            }
+            return allEntities;
+        } catch (Exception e) {
+            //Todo: logging an exception
+//            e.printStackTrace();
+            return null;
+        }
+    }
 
     //Todo: refactor me
     public static <T> T getById(@NotNull Object id, @NotNull Class<T> entityClass) {
@@ -59,6 +100,10 @@ abstract public class Entity<T extends Entity> {
         }
     }
 
+    public final List<T> getAll() {
+        Class<T> entityClass = (Class<T>) this.getClass();
+        return getAll(entityClass);
+    }
 
     //Fixme: unchecked cast
     public final T getById(@NotNull Object id) {
@@ -77,7 +122,7 @@ abstract public class Entity<T extends Entity> {
      * Deletes an instance with the same primary key from appropriate
      * database table.
      *
-     * @return <code>true</code> if entity was successfully deletedж otherwise <code>false</code>.
+     * @return <code>true</code> if entity was successfully deleted, otherwise <code>false</code>.
      */
     //Todo: refactor me
     public boolean delete() {
@@ -110,7 +155,7 @@ abstract public class Entity<T extends Entity> {
             return false;
         }
     }
-//
+
 //    public boolean update() {
 //
 //    }
