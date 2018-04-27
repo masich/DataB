@@ -1,23 +1,12 @@
 package test;
 
-import entities.Client;
-import entities.base.annotations.Table;
-
-
-import java.lang.reflect.Field;
 
 import java.sql.*;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
 
-        Client client = Client.getById(3,Client.class);
-        client.setFullName("LOXssbf");
-        try {
-            System.out.println(Client.update(client));
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        System.out.println();
 
        /* ResultSet rs = null;
         Connection conn = null;
