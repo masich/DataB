@@ -5,36 +5,37 @@ import entities.base.annotations.PrimaryKey;
 import entities.base.annotations.Table;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 
 public class ReflectionUtils {
-    public static String getPrimaryKey(Class<? extends Entity>  className){
+    public static String getPrimaryKey(Class<? extends Entity> entityClass) {
         String primaryKey = null;
+        List<Field> fields = getAllFields(new ArrayList<>(), entityClass);
 
-        ArrayList<Field> fields = getAllFields(new ArrayList<>(),className);
-
-        for(Field field : fields){
-            if(field.isAnnotationPresent(PrimaryKey.class)){
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(PrimaryKey.class)) {
                 primaryKey = field.getAnnotation(PrimaryKey.class).value();
             }
         }
+
         return primaryKey;
     }
 
-    private static ArrayList<Field> getAllFields(ArrayList<Field> fields, Class<?> type) {
-        fields.addAll(Arrays.asList(type.getDeclaredFields()));
-        if (type.getSuperclass() != null) {
-            getAllFields(fields, type.getSuperclass());
+    public static List<Field> getAllFields(Class<? extends Entity> entityClass) {
+        return getAllFields(new ArrayList<>(), entityClass);
+    }
+
+    private static List<Field> getAllFields(List<Field> fields, Class<?> entityClass) {
+        Collections.addAll(fields, entityClass.getDeclaredFields());
+        if (entityClass.getSuperclass() != null) {
+            getAllFields(fields, entityClass.getSuperclass());
         }
 
         return fields;
     }
 
-    public static String getTableName(Class<? extends Entity> entity){
-        return entity.getAnnotation(Table.class).value();
+    public static String getTableName(Class<? extends Entity> entityClass) {
+        return entityClass.getAnnotation(Table.class).value();
     }
-
-
 }
