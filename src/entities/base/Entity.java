@@ -1,10 +1,8 @@
 package entities.base;
 
-import com.sun.istack.internal.NotNull;
 import entities.base.annotations.Field;
-import entities.base.annotations.ForeignKey;
 import entities.base.annotations.PrimaryKey;
-import entities.base.annotations.Table;
+import entities.base.utils.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.sql.ResultSet;
@@ -15,11 +13,6 @@ import java.util.List;
 abstract public class Entity {
     public final boolean save() {
         return save(this);
-    }
-
-    public final <T> List<T> getAll() {
-        Class<T> entityClass = (Class<T>) this.getClass();
-        return getAll(entityClass);
     }
 
     /**
@@ -35,11 +28,6 @@ abstract public class Entity {
         return delete(this);
     }
 
-    //Fixme: unchecked cast
-    public final <T> T getById(@NotNull Object id) {
-        Class<T> entityClass = (Class<T>) this.getClass();
-        return getById(id, entityClass);
-    }
 
     /**
      * Returns all of the <code>entityClass</code> entities from the
@@ -52,59 +40,40 @@ abstract public class Entity {
      * <code>null</code> if something went wrong.
      */
     //Todo: extract boilerplate code into external methods
-    public static <T> List<T> getAll(@NotNull final Class<T> entityClass) {
+    public static <T> List<T> getAll(final Class<T> entityClass) {
         try {
-            String tableName = entityClass.getAnnotation(Table.class).value();
-            java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
-            ResultSet entityResultSet;
-            entityResultSet = DBManager.getInstance().getConnection().createStatement()
+            String tableName = ReflectionUtils.getTableName(entityClass);
+            List<java.lang.reflect.Field> entityFields = ReflectionUtils.getAllFields(entityClass);
+            ResultSet entityResultSet = DBManager.getInstance().getConnection().createStatement()
                     .executeQuery("SELECT  *  FROM " + tableName);
             List<T> allEntities = new ArrayList<>();
             while (entityResultSet.next()) {
-                T entity = entityClass.getDeclaredConstructor().newInstance();
-                for (java.lang.reflect.Field field : entityFields) {
-                    field.setAccessible(true);
-                    for (Annotation annotation : field.getDeclaredAnnotations()) {
-                        if (annotation instanceof PrimaryKey) {
-                            field.set(entity, entityResultSet.getObject(((PrimaryKey) annotation).value()));
-                        } else if (annotation instanceof ForeignKey) {
-                            field.set(entity, entityResultSet.getObject(((ForeignKey) annotation).value()));
-                        } else if (annotation instanceof Field) {
-                            field.set(entity, entityResultSet.getObject(((Field) annotation).value()));
-                        }
-                    }
-                }
-                allEntities.add(entity);
+                allEntities.add(getEntity(entityClass, entityResultSet));
             }
             return allEntities;
         } catch (Exception e) {
             //Todo: logging an exception
-//            e.printStackTrace();
-            return null;
+            e.printStackTrace();
         }
+        return null;
     }
 
-    public static <T> boolean deleteAll(@NotNull final Class<T> entityClass) {
-        boolean result = false;
+    public static boolean deleteAll(final Class<? extends Entity> entityClass) {
         try {
-            String tableName = entityClass.getAnnotation(Table.class).value();
-            DBManager.getInstance().getConnection().createStatement()
-                    .execute("DELETE FROM " + tableName);
-            result = true;
+            return DBManager.getInstance().getConnection().createStatement()
+                    .executeUpdate("DELETE FROM " + ReflectionUtils.getTableName(entityClass)) > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result;
+        return false;
     }
 
+    //Todo: refactor me after creating an QueryBuilder
     public static boolean save(final Entity obj) {
-        boolean result = false;
         try {
-            Class<?> entityClass = obj.getClass();
-            String tableName = entityClass.getAnnotation(Table.class).value();
-
-            java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
-
+            Class<? extends Entity> entityClass = obj.getClass();
+            String tableName = ReflectionUtils.getTableName(entityClass);
+            List<java.lang.reflect.Field> entityFields = ReflectionUtils.getAllFields(entityClass);
             StringBuilder query = new StringBuilder("UPDATE " + tableName + " SET ");
 
             java.lang.reflect.Field primary = null;
@@ -124,91 +93,75 @@ abstract public class Entity {
             query.deleteCharAt(query.lastIndexOf(","))
                     .append(" WHERE " + tableName + "." + id + " = '" + primary.get(obj) + "'");
 
-            result = DBManager.getInstance()
+            return DBManager.getInstance()
                     .getConnection()
                     .createStatement()
-                    .execute(query.toString());
-            result = true;
+                    .executeUpdate(query.toString()) > 0;
         } catch (SQLException | IllegalAccessException e) {
             e.printStackTrace();
         }
-
-        return result;
+        return false;
     }
 
     //Todo: refactor me
-    public static <T> T getById(@NotNull Object id, @NotNull Class<T> entityClass) {
+    public static <T> T getById(Object id, Class<T> entityClass) {
         try {
-            String tableName = entityClass.getAnnotation(Table.class).value();
-            String primaryKey = null;
+            String tableName = ReflectionUtils.getTableName(entityClass);
+            java.lang.reflect.Field primaryKeyField = ReflectionUtils.getPrimaryKeyField(entityClass);
+            if (primaryKeyField == null) return null;
+            String primaryKey = ReflectionUtils.getPrimaryKey(primaryKeyField);
 
-            java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
-            for (java.lang.reflect.Field field : entityFields) {
-                PrimaryKey primaryKeyAnnotation = field.getAnnotation(PrimaryKey.class);
-                if (primaryKeyAnnotation != null) {
-                    primaryKey = primaryKeyAnnotation.value();
-                    break;
-                }
-            }
-            if (primaryKey == null) {
-                return null;
-            }
-            ResultSet entityResultSet;
-            entityResultSet = DBManager.getInstance().getConnection().createStatement()
+            ResultSet entityResultSet = DBManager.getInstance().getConnection().createStatement()
                     .executeQuery("SELECT  *  FROM " + tableName
                             + " WHERE " + tableName + "." + primaryKey + " = " + id.toString());
-            if (!entityResultSet.next()) {
-                return null;
-            }
-            T entity = entityClass.getDeclaredConstructor().newInstance();
-            for (java.lang.reflect.Field field : entityFields) {
-                field.setAccessible(true);
-                for (Annotation annotation : field.getDeclaredAnnotations()) {
-                    if (annotation instanceof PrimaryKey) {
-                        field.set(entity, entityResultSet.getObject(((PrimaryKey) annotation).value()));
-                    } else if (annotation instanceof ForeignKey) {
-                        field.set(entity, entityResultSet.getObject(((ForeignKey) annotation).value()));
-                    } else if (annotation instanceof Field) {
-                        field.set(entity, entityResultSet.getObject(((Field) annotation).value()));
-                    }
-                }
-            }
-            return entity;
+            if (!entityResultSet.next()) return null;
+            return getEntity(entityClass, entityResultSet);
         } catch (Exception e) {
             //Todo: logging an exception
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     public static boolean delete(final Entity obj) {
         try {
-            Class<?> entityClass = obj.getClass();
-            String tableName = entityClass.getAnnotation(Table.class).value();
-            String primaryKey = null;
-            Object primaryKeyValue = null;
+            Class<? extends Entity> entityClass = obj.getClass();
+            String tableName = ReflectionUtils.getTableName(entityClass);
+            java.lang.reflect.Field primaryKeyField = ReflectionUtils.getPrimaryKeyField(entityClass);
+            if (primaryKeyField == null) return false;
+            String primaryKey = ReflectionUtils.getPrimaryKey(primaryKeyField);
+            Object primaryKeyValue = ReflectionUtils.getFieldValue(primaryKeyField, obj);
 
-            java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
-            for (java.lang.reflect.Field field : entityFields) {
-                PrimaryKey primaryKeyAnnotation = field.getAnnotation(PrimaryKey.class);
-                if (primaryKeyAnnotation != null) {
-                    field.setAccessible(true);
-                    primaryKey = primaryKeyAnnotation.value();
-                    primaryKeyValue = field.get(obj);
-                    break;
-                }
-            }
-            if (primaryKey == null) {
-                return false;
-            }
-            int deleted = DBManager.getInstance().getConnection().createStatement()
+            return DBManager.getInstance().getConnection().createStatement()
                     .executeUpdate("DELETE  FROM " + tableName
-                            + " WHERE " + tableName + "." + primaryKey + " = " + primaryKeyValue);
-            return deleted > 0;
+                            + " WHERE " + tableName + "." + primaryKey + " = " + primaryKeyValue) > 0;
         } catch (Exception e) {
             //Todo: logging an exception
             e.printStackTrace();
             return false;
         }
+    }
+
+    private static <T> T getEntity(Class<T> entityClass, ResultSet entityResultSet) {
+        T entity = ReflectionUtils.getNewInstance(entityClass);
+        List<java.lang.reflect.Field> entityFields = ReflectionUtils.getAllFields(entityClass);
+        try {
+            for (java.lang.reflect.Field field : entityFields) {
+                if (ReflectionUtils.isPrimaryKey(field)) {
+                    ReflectionUtils.setFieldValue(field, entity,
+                            entityResultSet.getObject(ReflectionUtils.getFieldName(field)));
+                } else if (ReflectionUtils.isField(field)) {
+                    ReflectionUtils.setFieldValue(field, entity,
+                            entityResultSet.getObject(ReflectionUtils.getFieldName(field)));
+                } else if (ReflectionUtils.isForeignKey(field)) {
+                    ReflectionUtils.setFieldValue(field, entity,
+                            entityResultSet.getObject(ReflectionUtils.getPrimaryKey(field)));
+                }
+            }
+        } catch (Exception e) {
+            //Todo: logging an exception
+            e.printStackTrace();
+        }
+        return entity;
     }
 }

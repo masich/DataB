@@ -1,6 +1,5 @@
 package entities.base.utils;
 
-import entities.base.Entity;
 import entities.base.annotations.Field;
 import entities.base.annotations.ForeignKey;
 import entities.base.annotations.PrimaryKey;
@@ -15,11 +14,11 @@ import java.util.List;
 
 
 public class ReflectionUtils {
-    public static java.lang.reflect.Field getPrimaryKeyField(final Class<? extends Entity> entityClass) {
+    public static java.lang.reflect.Field getPrimaryKeyField(final Class<?> entityClass) {
         List<java.lang.reflect.Field> fields = getAllFields(new ArrayList<>(), entityClass);
 
         for (java.lang.reflect.Field field : fields)
-            if (field.isAnnotationPresent(PrimaryKey.class))
+            if (isPrimaryKey(field))
                 return field;
 
         return null;
@@ -58,11 +57,11 @@ public class ReflectionUtils {
         return foreignKeyField.getAnnotation(ForeignKey.class).value();
     }
 
-    public static String getTableName(final Class<? extends Entity> entityClass) {
+    public static String getTableName(final Class<?> entityClass) {
         return entityClass.getAnnotation(Table.class).value();
     }
 
-    public static List<java.lang.reflect.Field> getAllFields(final Class<? extends Entity> entityClass) {
+    public static List<java.lang.reflect.Field> getAllFields(final Class<?> entityClass) {
         return getAllFields(new ArrayList<>(), entityClass);
     }
 
@@ -78,15 +77,15 @@ public class ReflectionUtils {
         return field.isAnnotationPresent(ForeignKey.class);
     }
 
-    public static <T> T getNewInstance(final Class<T> entity) {
+    public static <T> T getNewInstance(final Class<T> entityClass) {
         try {
-            Constructor<T> constructor = entity.getDeclaredConstructor();
+            Constructor<T> constructor = entityClass.getDeclaredConstructor();
             constructor.setAccessible(true);
             return constructor.newInstance();
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
-            new ConstructorNotFoundException("Class " + entity.getSimpleName() +
+            new ConstructorNotFoundException("Class " + entityClass.getSimpleName() +
                     " must have one constructor without parameters.", e).printStackTrace();
         }
         return null;
