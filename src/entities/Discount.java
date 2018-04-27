@@ -6,7 +6,7 @@ import entities.base.annotations.PrimaryKey;
 import entities.base.annotations.Table;
 
 @Table("DISCOUNTS")
-public class Discount extends Entity<Discount> {
+public class Discount extends Entity {
     @PrimaryKey("id_discount")
     private Long idDiscount;
     @Field("name")

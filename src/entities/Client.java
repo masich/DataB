@@ -8,7 +8,7 @@ import entities.base.annotations.Table;
 import java.sql.Timestamp;
 
 @Table("CLIENTS")
-public class Client extends Entity<Client> {
+public class Client extends Entity {
     @PrimaryKey("id_client")
     private long idClient;
     @Field("full_name")
@@ -17,6 +17,13 @@ public class Client extends Entity<Client> {
     private Timestamp birthday;
     @Field("games_count")
     private long gamesCount;
+
+    public Client(long idClient, String fullName, Timestamp birthday, long gamesCount) {
+        this.idClient = idClient;
+        this.fullName = fullName;
+        this.birthday = birthday;
+        this.gamesCount = gamesCount;
+    }
 
     public long getIdClient() {
         return idClient;

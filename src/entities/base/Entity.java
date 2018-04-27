@@ -5,16 +5,42 @@ import entities.base.annotations.Field;
 import entities.base.annotations.ForeignKey;
 import entities.base.annotations.PrimaryKey;
 import entities.base.annotations.Table;
-//import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract public class Entity<T extends Entity> {
+abstract public class Entity {
+    public final boolean save() {
+        return save(this);
+    }
+
+    public final <T> List<T> getAll() {
+        Class<T> entityClass = (Class<T>) this.getClass();
+        return getAll(entityClass);
+    }
+
+    /**
+     * Deletes an instance from appropriate database table.
+     * <p>
+     * Deletes an instance with the same primary key from appropriate
+     * database table.
+     *
+     * @return <code>true</code> if entity was successfully deleted, otherwise <code>false</code>.
+     */
+    //Todo: refactor me
+    public final boolean delete() {
+        return delete(this);
+    }
+
+    //Fixme: unchecked cast
+    public final <T> T getById(@NotNull Object id) {
+        Class<T> entityClass = (Class<T>) this.getClass();
+        return getById(id, entityClass);
+    }
+
     /**
      * Returns all of the <code>entityClass</code> entities from the
      * appropriate database table.
@@ -26,7 +52,7 @@ abstract public class Entity<T extends Entity> {
      * <code>null</code> if something went wrong.
      */
     //Todo: extract boilerplate code into external methods
-    public static <T> List<T> getAll(@NotNull Class<T> entityClass) {
+    public static <T> List<T> getAll(@NotNull final Class<T> entityClass) {
         try {
             String tableName = entityClass.getAnnotation(Table.class).value();
             java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
@@ -58,7 +84,7 @@ abstract public class Entity<T extends Entity> {
         }
     }
 
-    public static <T> boolean deleteAll(@NotNull Class<T> entityClass) {
+    public static <T> boolean deleteAll(@NotNull final Class<T> entityClass) {
         boolean result = false;
         try {
             String tableName = entityClass.getAnnotation(Table.class).value();
@@ -71,48 +97,44 @@ abstract public class Entity<T extends Entity> {
         return result;
     }
 
-    public static <T> boolean update(T obj) throws IllegalAccessException {
+    public static boolean save(final Entity obj) {
         boolean result = false;
+        try {
+            Class<?> entityClass = obj.getClass();
+            String tableName = entityClass.getAnnotation(Table.class).value();
 
-        Class<T> entityClass = (Class<T>) obj.getClass();
-        String tableName = entityClass.getAnnotation(Table.class).value();
+            java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
 
-        java.lang.reflect.Field[] entityFields = entityClass.getDeclaredFields();
+            StringBuilder query = new StringBuilder("UPDATE " + tableName + " SET ");
 
-        StringBuilder query = new StringBuilder("UPDATE " + tableName + " SET ");
+            java.lang.reflect.Field primary = null;
+            String id = null;
 
-        java.lang.reflect.Field primary = null;
-        String id = null;
-
-        for (java.lang.reflect.Field field : entityFields) {
-            field.setAccessible(true);
-            for (Annotation annotation : field.getDeclaredAnnotations()) {
-                if (annotation instanceof Field)
-                    query.append(tableName + "." + ((Field) annotation).value() + " = '" + field.get(obj).toString() + "', ");
-                if (annotation instanceof PrimaryKey) {
-                    primary = field;
-                    id = ((PrimaryKey) annotation).value();
+            for (java.lang.reflect.Field field : entityFields) {
+                field.setAccessible(true);
+                for (Annotation annotation : field.getDeclaredAnnotations()) {
+                    if (annotation instanceof Field)
+                        query.append(tableName + "." + ((Field) annotation).value() + " = '" + field.get(obj).toString() + "', ");
+                    if (annotation instanceof PrimaryKey) {
+                        primary = field;
+                        id = ((PrimaryKey) annotation).value();
+                    }
                 }
             }
-        }
+            query.deleteCharAt(query.lastIndexOf(","))
+                    .append(" WHERE " + tableName + "." + id + " = '" + primary.get(obj) + "'");
 
-        query.deleteCharAt(query.lastIndexOf(","))
-                .append(" WHERE " + tableName + "." + id + " = '" + primary.get(obj) + "'");
-
-
-        try {
             result = DBManager.getInstance()
                     .getConnection()
                     .createStatement()
                     .execute(query.toString());
             result = true;
-        } catch (SQLException e) {
+        } catch (SQLException | IllegalAccessException e) {
             e.printStackTrace();
         }
 
         return result;
     }
-
 
     //Todo: refactor me
     public static <T> T getById(@NotNull Object id, @NotNull Class<T> entityClass) {
@@ -159,34 +181,9 @@ abstract public class Entity<T extends Entity> {
         }
     }
 
-    public final List<T> getAll() {
-        Class<T> entityClass = (Class<T>) this.getClass();
-        return getAll(entityClass);
-    }
-
-    //Fixme: unchecked cast
-    public final T getById(@NotNull Object id) {
-        Class<T> entityClass = (Class<T>) this.getClass();
-        return getById(id, entityClass);
-    }
-
-    //    public boolean save() {
-//
-//    }
-//
-
-    /**
-     * Deletes an instance from appropriate database table.
-     * <p>
-     * Deletes an instance with the same primary key from appropriate
-     * database table.
-     *
-     * @return <code>true</code> if entity was successfully deleted, otherwise <code>false</code>.
-     */
-    //Todo: refactor me
-    public boolean delete() {
+    public static boolean delete(final Entity obj) {
         try {
-            Class<T> entityClass = (Class<T>) this.getClass();
+            Class<?> entityClass = obj.getClass();
             String tableName = entityClass.getAnnotation(Table.class).value();
             String primaryKey = null;
             Object primaryKeyValue = null;
@@ -197,7 +194,7 @@ abstract public class Entity<T extends Entity> {
                 if (primaryKeyAnnotation != null) {
                     field.setAccessible(true);
                     primaryKey = primaryKeyAnnotation.value();
-                    primaryKeyValue = field.get(this);
+                    primaryKeyValue = field.get(obj);
                     break;
                 }
             }
@@ -214,8 +211,4 @@ abstract public class Entity<T extends Entity> {
             return false;
         }
     }
-
-//    public boolean update() {
-//
-//    }
 }

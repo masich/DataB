@@ -6,6 +6,7 @@ import entities.base.DBManager;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class Test {
@@ -18,9 +19,11 @@ public class Test {
 //        }
 //        Client client = Client.getById(1, Client.class);
 //        System.out.println(client.delete());
-        List<Discount> discounts = Discount.getAll(Discount.class);
-        System.out.println(discounts);
-        Discount discount = Discount.getById(5,Discount.class);
-        System.out.println(discount);
+        Client client = new Client(1, "Max", new Timestamp(date.getTime()),12 );
+        client.save();
+
+
+        List<Client> clients = Client.getAll(Client.class);
+        clients.get(0).delete();
     }
 }
