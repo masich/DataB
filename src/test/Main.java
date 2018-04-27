@@ -2,7 +2,6 @@ package test;
 
 import entities.Client;
 
-
 import java.sql.*;
 import java.util.Collections;
 
@@ -12,7 +11,6 @@ public class Main {
 //        Client client = new Client(1, );
 //        client.setFullName("LOXssbf");
 //        System.out.println(Client.save(client));
-
        /* ResultSet rs = null;
         Connection conn = null;
         try {
