@@ -1,17 +1,21 @@
 package entities.base;
 
+import entities.base.exceptions.FieldNotFoundException;
 import entities.base.queries.MySQLQuery;
 import entities.base.queries.base.SQLQuery;
 import entities.base.utils.ReflectionUtils;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 abstract public class Entity {
-    public final boolean save() {
-        return save(this);
+    public final void save() {
+        save(this);
     }
 
     /**
@@ -66,35 +70,57 @@ abstract public class Entity {
         return false;
     }
 
-    public static boolean save(final Entity obj) {
+    public static void save(final Entity obj) {
         try {
-            Class<? extends Entity> entityClass = obj.getClass();
-            String tableName = ReflectionUtils.getTableName(entityClass);
-            List<java.lang.reflect.Field> entityFields = ReflectionUtils.getAllFields(entityClass);
-            MySQLQuery.Builder queryBuilder = new MySQLQuery.Builder()
-                    .replace()
-                    .into()
-                    .appendQuery(tableName)
-                    .values();
-            MySQLQuery.Chain.Builder valuesBuilder = new MySQLQuery.Chain.Builder();
-            for (java.lang.reflect.Field field : entityFields) {
-                if (ReflectionUtils.isField(field)) {
-                    valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
-                } else if (ReflectionUtils.isForeignKey(field)) {
-                    valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
-                } else if (ReflectionUtils.isPrimaryKey(field)) {
-                    valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
-                }
-            }
-            SQLQuery query = queryBuilder.appendQueryPart(valuesBuilder.build()).build();
-            return DBManager.getInstance()
-                    .getConnection()
-                    .createStatement()
-                    .executeUpdate(query.toRawString()) > 0;
+            Connection connection = DBManager.getInstance().getConnection();
+            connection.setAutoCommit(false);
+            saveRecursively(obj, new HashSet<>());
+            connection.setAutoCommit(true);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
+    }
+
+    private static void saveRecursively(final Object obj, Set<Object> saved) throws SQLException {
+        Class<?> entityClass = obj.getClass();
+        try {
+            SQLQuery query;
+            if (!saved.contains(obj)) {
+                if (Entity.class.isAssignableFrom(entityClass)) {
+                    saved.add(obj);
+                    String tableName = ReflectionUtils.getTableName(entityClass);
+                    List<java.lang.reflect.Field> entityFields = ReflectionUtils.getAllFields(entityClass);
+                    MySQLQuery.Builder queryBuilder = new MySQLQuery.Builder()
+                            .replace()
+                            .into()
+                            .appendQuery(tableName)
+                            .values();
+                    MySQLQuery.Chain.Builder valuesBuilder = new MySQLQuery.Chain.Builder();
+                    for (java.lang.reflect.Field field : entityFields) {
+                        if (ReflectionUtils.isField(field)) {
+                            valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
+                        } else if (ReflectionUtils.isForeignKey(field)) {
+                            Object foreignKeyValue = ReflectionUtils.getFieldValue(field, obj);
+                            saveRecursively(foreignKeyValue, saved);
+                            valuesBuilder.appendUnit(ReflectionUtils.getPrimaryKeyValue(foreignKeyValue));
+                        } else if (ReflectionUtils.isPrimaryKey(field)) {
+                            valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
+                        }
+                    }
+                    query = queryBuilder.appendQueryPart(valuesBuilder.build()).build();
+                } else {
+                    //Todo: Serialize another objects
+                    query = new MySQLQuery("");
+                }
+                DBManager.getInstance()
+                        .getConnection()
+                        .createStatement()
+                        .executeUpdate(query.toRawString());
+            }
+        } catch (FieldNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public static <T> T getById(Object id, Class<T> entityClass) {

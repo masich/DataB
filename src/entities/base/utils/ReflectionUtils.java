@@ -5,6 +5,7 @@ import entities.base.annotations.ForeignKey;
 import entities.base.annotations.PrimaryKey;
 import entities.base.annotations.Table;
 import entities.base.exceptions.ConstructorNotFoundException;
+import entities.base.exceptions.FieldNotFoundException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -14,14 +15,14 @@ import java.util.List;
 
 
 public class ReflectionUtils {
-    public static java.lang.reflect.Field getPrimaryKeyField(final Class<?> entityClass) {
+    public static java.lang.reflect.Field getPrimaryKeyField(final Class<?> entityClass) throws FieldNotFoundException {
         List<java.lang.reflect.Field> fields = getAllFields(new ArrayList<>(), entityClass);
 
         for (java.lang.reflect.Field field : fields)
             if (isPrimaryKey(field))
                 return field;
 
-        return null;
+        throw new FieldNotFoundException("Class " + entityClass.getName() + " has no primary key!");
     }
 
     public static boolean setFieldValue(final java.lang.reflect.Field field, final Object obj, final Object value) {
@@ -47,6 +48,11 @@ public class ReflectionUtils {
 
     public static String getPrimaryKey(final java.lang.reflect.Field primaryKeyField) {
         return primaryKeyField.getAnnotation(PrimaryKey.class).value();
+    }
+
+    public static <T> Object getPrimaryKeyValue(T obj) throws FieldNotFoundException {
+        java.lang.reflect.Field primaryKeyField = getPrimaryKeyField(obj.getClass());
+        return getFieldValue(primaryKeyField, obj);
     }
 
     public static String getFieldName(final java.lang.reflect.Field field) {

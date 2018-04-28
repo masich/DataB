@@ -1,10 +1,30 @@
 package entities;
 
-public class Map {
+import entities.base.Entity;
+import entities.base.annotations.Field;
+import entities.base.annotations.PrimaryKey;
+import entities.base.annotations.Table;
+
+@Table("MAPS")
+public class Map extends Entity {
+    @PrimaryKey("id_map")
     private Long idMap;
+    @Field("name")
     private String name;
+    @Field("capacity")
     private Integer capacity;
+    @Field("price_hour")
     private Double pricePerHour;
+
+    private Map() {
+    }
+
+    public Map(Long idMap, String name, Integer capacity, Double pricePerHour) {
+        this.idMap = idMap;
+        this.name = name;
+        this.capacity = capacity;
+        this.pricePerHour = pricePerHour;
+    }
 
     public Integer getCapacity() {
         return capacity;
