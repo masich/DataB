@@ -39,8 +39,6 @@ public abstract class SQLQuery {
             public Builder(String initialPart) {
                 super(initialPart);
             }
-
-            public abstract T build();
         }
     }
 }
