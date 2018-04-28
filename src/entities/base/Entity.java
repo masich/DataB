@@ -1,10 +1,9 @@
 package entities.base;
 
-import entities.base.annotations.Field;
-import entities.base.annotations.PrimaryKey;
+import entities.base.queries.MySQLQuery;
+import entities.base.queries.base.SQLQuery;
 import entities.base.utils.ReflectionUtils;
 
-import java.lang.annotation.Annotation;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ abstract public class Entity {
      *
      * @return <code>true</code> if entity was successfully deleted, otherwise <code>false</code>.
      */
-    //Todo: refactor me
     public final boolean delete() {
         return delete(this);
     }
@@ -39,13 +37,12 @@ abstract public class Entity {
      * emptyList if the database table is empty,
      * <code>null</code> if something went wrong.
      */
-    //Todo: extract boilerplate code into external methods
     public static <T> List<T> getAll(final Class<T> entityClass) {
         try {
             String tableName = ReflectionUtils.getTableName(entityClass);
-            List<java.lang.reflect.Field> entityFields = ReflectionUtils.getAllFields(entityClass);
+            SQLQuery query = new MySQLQuery.Builder().select().all().from(tableName).build();
             ResultSet entityResultSet = DBManager.getInstance().getConnection().createStatement()
-                    .executeQuery("SELECT  *  FROM " + tableName);
+                    .executeQuery(query.toRawString());
             List<T> allEntities = new ArrayList<>();
             while (entityResultSet.next()) {
                 allEntities.add(getEntity(entityClass, entityResultSet));
@@ -60,60 +57,63 @@ abstract public class Entity {
 
     public static boolean deleteAll(final Class<? extends Entity> entityClass) {
         try {
+            SQLQuery query = new MySQLQuery.Builder().delete().from(ReflectionUtils.getTableName(entityClass)).build();
             return DBManager.getInstance().getConnection().createStatement()
-                    .executeUpdate("DELETE FROM " + ReflectionUtils.getTableName(entityClass)) > 0;
+                    .executeUpdate(query.toRawString()) > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    //Todo: refactor me after creating an QueryBuilder
     public static boolean save(final Entity obj) {
         try {
             Class<? extends Entity> entityClass = obj.getClass();
             String tableName = ReflectionUtils.getTableName(entityClass);
             List<java.lang.reflect.Field> entityFields = ReflectionUtils.getAllFields(entityClass);
-            StringBuilder query = new StringBuilder("UPDATE " + tableName + " SET ");
-
-            java.lang.reflect.Field primary = null;
-            String id = null;
-
+            MySQLQuery.Builder queryBuilder = new MySQLQuery.Builder()
+                    .replace()
+                    .into()
+                    .appendQuery(tableName)
+                    .values();
+            MySQLQuery.Chain.Builder valuesBuilder = new MySQLQuery.Chain.Builder();
             for (java.lang.reflect.Field field : entityFields) {
-                field.setAccessible(true);
-                for (Annotation annotation : field.getDeclaredAnnotations()) {
-                    if (annotation instanceof Field)
-                        query.append(tableName + "." + ((Field) annotation).value() + " = '" + field.get(obj).toString() + "', ");
-                    if (annotation instanceof PrimaryKey) {
-                        primary = field;
-                        id = ((PrimaryKey) annotation).value();
-                    }
+                if (ReflectionUtils.isField(field)) {
+                    valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
+                } else if (ReflectionUtils.isForeignKey(field)) {
+                    valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
+                } else if (ReflectionUtils.isPrimaryKey(field)) {
+                    valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
                 }
             }
-            query.deleteCharAt(query.lastIndexOf(","))
-                    .append(" WHERE " + tableName + "." + id + " = '" + primary.get(obj) + "'");
-
+            SQLQuery query = queryBuilder.appendQueryPart(valuesBuilder.build()).build();
             return DBManager.getInstance()
                     .getConnection()
                     .createStatement()
-                    .executeUpdate(query.toString()) > 0;
-        } catch (SQLException | IllegalAccessException e) {
+                    .executeUpdate(query.toRawString()) > 0;
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    //Todo: refactor me
     public static <T> T getById(Object id, Class<T> entityClass) {
         try {
             String tableName = ReflectionUtils.getTableName(entityClass);
             java.lang.reflect.Field primaryKeyField = ReflectionUtils.getPrimaryKeyField(entityClass);
             if (primaryKeyField == null) return null;
             String primaryKey = ReflectionUtils.getPrimaryKey(primaryKeyField);
-
+            MySQLQuery.Builder queryBuilder = new MySQLQuery.Builder()
+                    .select()
+                    .all()
+                    .from(tableName)
+                    .where();
+            MySQLQuery.Condition condition = new MySQLQuery.Condition.Builder()
+                    .equals(primaryKey, id)
+                    .build();
+            SQLQuery query = queryBuilder.appendQueryPart(condition).build();
             ResultSet entityResultSet = DBManager.getInstance().getConnection().createStatement()
-                    .executeQuery("SELECT  *  FROM " + tableName
-                            + " WHERE " + tableName + "." + primaryKey + " = " + id.toString());
+                    .executeQuery(query.toRawString());
             if (!entityResultSet.next()) return null;
             return getEntity(entityClass, entityResultSet);
         } catch (Exception e) {
@@ -130,11 +130,17 @@ abstract public class Entity {
             java.lang.reflect.Field primaryKeyField = ReflectionUtils.getPrimaryKeyField(entityClass);
             if (primaryKeyField == null) return false;
             String primaryKey = ReflectionUtils.getPrimaryKey(primaryKeyField);
-            Object primaryKeyValue = ReflectionUtils.getFieldValue(primaryKeyField, obj);
-
+            Object id = ReflectionUtils.getFieldValue(primaryKeyField, obj);
+            MySQLQuery.Builder queryBuilder = new MySQLQuery.Builder()
+                    .delete()
+                    .from(tableName)
+                    .where();
+            MySQLQuery.Condition condition = new MySQLQuery.Condition.Builder()
+                    .equals(primaryKey, id)
+                    .build();
+            SQLQuery query = queryBuilder.appendQueryPart(condition).build();
             return DBManager.getInstance().getConnection().createStatement()
-                    .executeUpdate("DELETE  FROM " + tableName
-                            + " WHERE " + tableName + "." + primaryKey + " = " + primaryKeyValue) > 0;
+                    .executeUpdate(query.toRawString()) > 0;
         } catch (Exception e) {
             //Todo: logging an exception
             e.printStackTrace();
@@ -149,13 +155,13 @@ abstract public class Entity {
             for (java.lang.reflect.Field field : entityFields) {
                 if (ReflectionUtils.isPrimaryKey(field)) {
                     ReflectionUtils.setFieldValue(field, entity,
-                            entityResultSet.getObject(ReflectionUtils.getFieldName(field)));
+                            entityResultSet.getObject(ReflectionUtils.getPrimaryKey(field)));
                 } else if (ReflectionUtils.isField(field)) {
                     ReflectionUtils.setFieldValue(field, entity,
                             entityResultSet.getObject(ReflectionUtils.getFieldName(field)));
                 } else if (ReflectionUtils.isForeignKey(field)) {
                     ReflectionUtils.setFieldValue(field, entity,
-                            entityResultSet.getObject(ReflectionUtils.getPrimaryKey(field)));
+                            entityResultSet.getObject(ReflectionUtils.getForeignKey(field)));
                 }
             }
         } catch (Exception e) {

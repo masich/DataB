@@ -18,6 +18,9 @@ public class Client extends Entity {
     @Field("games_count")
     private long gamesCount;
 
+    private Client() {
+    }
+
     public Client(long idClient, String fullName, Timestamp birthday, long gamesCount) {
         this.idClient = idClient;
         this.fullName = fullName;
