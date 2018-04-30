@@ -98,6 +98,10 @@ public class ReflectionUtils {
 
     }
 
+    public static Class getFieldType(java.lang.reflect.Field field) {
+        return field.getType();
+    }
+
     private static List<java.lang.reflect.Field> getAllFields(List<java.lang.reflect.Field> fields, Class<?> entityClass) {
         Collections.addAll(fields, entityClass.getDeclaredFields());
         if (entityClass.getSuperclass() != null) {
