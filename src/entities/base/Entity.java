@@ -6,7 +6,6 @@ import entities.base.queries.base.SQLQuery;
 import entities.base.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -36,7 +35,9 @@ abstract public class Entity {
     /**
      * @param deleteRecursively if <code>true</code> the recursive deletion will be used.
      */
-    public final void delete(boolean deleteRecursively) {
+    //Todo: make foreign key NULLABLE in DB as requirement (?)
+    //Fixme: Is recursion delete necessary? You can achieve it using pure DB settings (simply make Constraint on Foreign Key 'CASCADE' on delete)
+    private void delete(boolean deleteRecursively) {
         delete(deleteRecursively, this);
     }
 
@@ -52,11 +53,12 @@ abstract public class Entity {
     //Todo: add exception logging
     public static void save(boolean saveRecursively, final Entity obj) {
         try {
-            Connection connection = DBManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
+            DBManager dbManager = DBManager.getInstance();
+            dbManager.beginTransaction();
+            dbManager.checkForeignKey(false);
             save(saveRecursively, obj, new HashSet<>());
-            connection.commit();
-            connection.setAutoCommit(true);
+            dbManager.checkForeignKey(true);
+            dbManager.finishTransaction();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (FieldNotFoundException e) {
@@ -76,11 +78,10 @@ abstract public class Entity {
     //Todo: add exception logging
     public static void delete(boolean deleteRecursively, final Entity obj) {
         try {
-            Connection connection = DBManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
+            DBManager dbManager = DBManager.getInstance();
+            dbManager.beginTransaction();
             delete(deleteRecursively, obj, new HashSet<>());
-            connection.commit();
-            connection.setAutoCommit(true);
+            dbManager.finishTransaction();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (FieldNotFoundException e) {
@@ -139,7 +140,8 @@ abstract public class Entity {
                     .executeQuery(query.toRawString());
             List<T> allEntities = new ArrayList<>();
             while (entityResultSet.next()) {
-                allEntities.add(getEntity(entityClass, entityResultSet));
+                T entity = ReflectionUtils.getNewInstance(entityClass);
+                allEntities.add(initEntity(entity, entityResultSet));
             }
             return allEntities;
         } catch (Exception e) {
@@ -149,6 +151,7 @@ abstract public class Entity {
         return null;
     }
 
+    //Todo: create entity deleting in exception case
     private static void save(boolean saveRecursively, final Entity obj, Set<Entity> saved) throws SQLException, FieldNotFoundException {
         Class<? extends Entity> entityClass = obj.getClass();
         SQLQuery query;
@@ -240,8 +243,9 @@ abstract public class Entity {
                 ResultSet entityResultSet = DBManager.getInstance().getConnection().createStatement()
                         .executeQuery(query.toRawString());
                 if (!entityResultSet.next()) return null;
-                T entity = getEntity(entityClass, entityResultSet);
+                T entity = ReflectionUtils.getNewInstance(entityClass);
                 addInitialized(entity, id, initialized);
+                initEntity(entity, entityResultSet, initialized);
                 return entity;
             } else {
                 return getInitialized(id, entityClass, initialized);
@@ -274,9 +278,12 @@ abstract public class Entity {
         return (T) initialized.get(entityClass).get(id);
     }
 
-    //Fixme: npe
-    private static <T> T getEntity(Class<T> entityClass, ResultSet entityResultSet) throws SQLException {
-        T entity = ReflectionUtils.getNewInstance(entityClass);
+    private static <T> T initEntity(T entity, ResultSet entityResultSet) throws SQLException {
+        return initEntity(entity, entityResultSet, new HashMap<Class, Map<Object, Object>>());
+    }
+
+    private static <T> T initEntity(T entity, ResultSet entityResultSet, Map<Class, Map<Object, Object>> initialized) throws SQLException {
+        Class<?> entityClass = entity.getClass();
         List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
         for (Field field : entityFields) {
             if (ReflectionUtils.isPrimaryKey(field)) {
@@ -287,8 +294,8 @@ abstract public class Entity {
                         entityResultSet.getObject(ReflectionUtils.getFieldName(field)));
             } else if (ReflectionUtils.isForeignKey(field)) {
                 Object foreignKeyId = entityResultSet.getObject(ReflectionUtils.getForeignKey(field));
-                Class foreignKeyClass = ReflectionUtils.getFieldType(field);
-                Object foreignKeyObject = getById(foreignKeyId, foreignKeyClass);
+                Class<?> foreignKeyClass = ReflectionUtils.getFieldType(field);
+                Object foreignKeyObject = getById(foreignKeyId, foreignKeyClass, initialized);
                 ReflectionUtils.setFieldValue(field, entity, foreignKeyObject);
             }
         }

@@ -51,6 +51,7 @@ public class ReflectionUtils {
     }
 
     public static <T> Object getPrimaryKeyValue(T obj) throws FieldNotFoundException {
+        if (obj == null) return null;
         java.lang.reflect.Field primaryKeyField = getPrimaryKeyField(obj.getClass());
         return getFieldValue(primaryKeyField, obj);
     }

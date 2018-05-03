@@ -7,6 +7,11 @@ public class MySQLQuery extends SQLQuery {
         super(rawString);
     }
 
+    private static String toSQLValue(Object object) {
+        String quotes = object == null ? ""  : "\'";
+        return new StringBuffer(quotes).append(object).append(quotes).toString();
+    }
+
     public static class Builder extends SQLQuery.Builder<MySQLQuery> {
 
         public Builder() {
@@ -105,7 +110,7 @@ public class MySQLQuery extends SQLQuery {
             }
 
             public Builder appendUnit(Object rawUnit) {
-                this.rawQuery.append(DIVIDER).append('\'').append(rawUnit).append('\'');
+                this.rawQuery.append(DIVIDER).append(toSQLValue(rawUnit));
                 return this;
             }
 
@@ -122,6 +127,7 @@ public class MySQLQuery extends SQLQuery {
             super(rawString);
         }
 
+        //Todo: refactor me; replace 'a' param type by String because it is a column identifier (?)
         public static class Builder extends QueryPart.Builder<Condition> {
 
             public Builder equals(Object a, Object b) {
@@ -145,7 +151,7 @@ public class MySQLQuery extends SQLQuery {
             }
 
             private Builder appendCondition(Object a, Object operator, Object b) {
-                return appendQuery(a).appendQuery(operator).appendQuery(b);
+                return appendQuery(a).appendQuery(operator).appendQuery(toSQLValue(b));
             }
 
             private Builder appendQuery(Object a) {
