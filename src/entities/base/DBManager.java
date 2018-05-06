@@ -21,8 +21,23 @@ public class DBManager {
         dbConnection.close();
     }
 
+    public void beginTransaction() throws SQLException {
+        dbConnection.setAutoCommit(false);
+    }
+
+    public void finishTransaction() throws SQLException {
+        dbConnection.commit();
+        dbConnection.setAutoCommit(true);
+    }
+
+    public void checkForeignKey(boolean check) throws SQLException {
+        dbConnection.createStatement()
+                .execute("SET FOREIGN_KEY_CHECKS = " + (check ? "1" : "0"));
+    }
+
     private static DBManager managerInstance;
 
+    //Fixme
     public static DBManager getInstance() throws SQLException {
         if (managerInstance == null) {
             managerInstance = new DBManager("jdbc:mysql://localhost/" + KeyStore.DB_NAME + "?" +
