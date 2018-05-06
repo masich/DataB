@@ -1,5 +1,6 @@
 package entities.base;
 
+import entities.base.converters.base.Converter;
 import entities.base.exceptions.FieldNotFoundException;
 import entities.base.queries.MySQLQuery;
 import entities.base.queries.base.SQLQuery;
@@ -53,7 +54,7 @@ abstract public class Entity {
     //Todo: add exception logging
     public static void save(boolean saveRecursively, final Entity obj) {
         try {
-            DBManager dbManager = DBManager.getInstance();
+            DBManager dbManager = DBManager.getSingleton();
             dbManager.beginTransaction();
             dbManager.checkForeignKey(false);
             save(saveRecursively, obj, new HashSet<>());
@@ -78,7 +79,7 @@ abstract public class Entity {
     //Todo: add exception logging
     public static void delete(boolean deleteRecursively, final Entity obj) {
         try {
-            DBManager dbManager = DBManager.getInstance();
+            DBManager dbManager = DBManager.getSingleton();
             dbManager.beginTransaction();
             delete(deleteRecursively, obj, new HashSet<>());
             dbManager.finishTransaction();
@@ -90,7 +91,7 @@ abstract public class Entity {
     }
 
     /**
-     * Deletes all of  the instances from the corresponding database table.
+     * Deletes all of the instances from the corresponding database table.
      *
      * @param entityClass class of the database table entity.
      */
@@ -100,8 +101,7 @@ abstract public class Entity {
                     .delete()
                     .from(ReflectionUtils.getTableName(entityClass))
                     .build();
-            return DBManager.getInstance().getConnection().createStatement()
-                    .executeUpdate(query.toRawString()) > 0;
+            return executeUpdate(query) > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -136,8 +136,7 @@ abstract public class Entity {
         try {
             String tableName = ReflectionUtils.getTableName(entityClass);
             SQLQuery query = new MySQLQuery.Builder().select().all().from(tableName).build();
-            ResultSet entityResultSet = DBManager.getInstance().getConnection().createStatement()
-                    .executeQuery(query.toRawString());
+            ResultSet entityResultSet = executeQuery(query);
             List<T> allEntities = new ArrayList<>();
             while (entityResultSet.next()) {
                 T entity = ReflectionUtils.getNewInstance(entityClass);
@@ -168,10 +167,11 @@ abstract public class Entity {
                 MySQLQuery.Chain.Builder valuesBuilder = new MySQLQuery.Chain.Builder();
                 for (Field field : entityFields) {
                     if (ReflectionUtils.isField(field)) {
-                        valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
+                        Object fieldValue = ReflectionUtils.getFieldValue(field, obj);
+                        valuesBuilder.appendUnit(DBManager.getSingleton().getConverter().convertToString(fieldValue));
                     } else if (ReflectionUtils.isForeignKey(field)) {
                         Entity foreignKeyValue = (Entity) ReflectionUtils.getFieldValue(field, obj);
-                        if (saveRecursively) save(true, foreignKeyValue, saved);
+                        if (saveRecursively && foreignKeyValue != null) save(true, foreignKeyValue, saved);
                         valuesBuilder.appendUnit(ReflectionUtils.getPrimaryKeyValue(foreignKeyValue));
                     } else if (ReflectionUtils.isPrimaryKey(field)) {
                         valuesBuilder.appendUnit(ReflectionUtils.getFieldValue(field, obj));
@@ -182,10 +182,7 @@ abstract public class Entity {
                 //Todo: Serialize another objects
                 query = new MySQLQuery("");
             }
-            DBManager.getInstance()
-                    .getConnection()
-                    .createStatement()
-                    .executeUpdate(query.toRawString());
+            executeUpdate(query);
         }
     }
 
@@ -201,8 +198,10 @@ abstract public class Entity {
             List<Field> fields = ReflectionUtils.getAllFields(entityClass);
             for (Field field : fields) {
                 if (ReflectionUtils.isForeignKey(field)) {
-                    Entity foreignKeyValue = (Entity) ReflectionUtils.getFieldValue(field, obj);
-                    if (deleteRecursively) delete(true, foreignKeyValue, deleted);
+                    if (deleteRecursively) {
+                        Entity foreignKeyValue = (Entity) ReflectionUtils.getFieldValue(field, obj);
+                        delete(true, foreignKeyValue, deleted);
+                    }
                 } else if (ReflectionUtils.isPrimaryKey(field)) {
                     primaryKey = ReflectionUtils.getPrimaryKey(field);
                     id = ReflectionUtils.getFieldValue(field, obj);
@@ -218,10 +217,7 @@ abstract public class Entity {
                     .equals(primaryKey, id)
                     .build();
             query = queryBuilder.appendQueryPart(condition).build();
-            DBManager.getInstance()
-                    .getConnection()
-                    .createStatement()
-                    .executeUpdate(query.toRawString());
+            executeUpdate(query);
         }
     }
 
@@ -240,8 +236,7 @@ abstract public class Entity {
                         .equals(primaryKey, id)
                         .build();
                 SQLQuery query = queryBuilder.appendQueryPart(condition).build();
-                ResultSet entityResultSet = DBManager.getInstance().getConnection().createStatement()
-                        .executeQuery(query.toRawString());
+                ResultSet entityResultSet = executeQuery(query);
                 if (!entityResultSet.next()) return null;
                 T entity = ReflectionUtils.getNewInstance(entityClass);
                 addInitialized(entity, id, initialized);
@@ -284,14 +279,20 @@ abstract public class Entity {
 
     private static <T> T initEntity(T entity, ResultSet entityResultSet, Map<Class, Map<Object, Object>> initialized) throws SQLException {
         Class<?> entityClass = entity.getClass();
+        Converter converter = DBManager.getSingleton().getConverter();
         List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
         for (Field field : entityFields) {
             if (ReflectionUtils.isPrimaryKey(field)) {
                 ReflectionUtils.setFieldValue(field, entity,
                         entityResultSet.getObject(ReflectionUtils.getPrimaryKey(field)));
             } else if (ReflectionUtils.isField(field)) {
-                ReflectionUtils.setFieldValue(field, entity,
-                        entityResultSet.getObject(ReflectionUtils.getFieldName(field)));
+                String fieldName = ReflectionUtils.getFieldName(field);
+                Class<?> fieldType = ReflectionUtils.getFieldType(field);
+                Object result = entityResultSet.getObject(fieldName);
+                if (result instanceof String) {
+                    result = converter.convertFromString((String) result, fieldType);
+                }
+                ReflectionUtils.setFieldValue(field, entity, result);
             } else if (ReflectionUtils.isForeignKey(field)) {
                 Object foreignKeyId = entityResultSet.getObject(ReflectionUtils.getForeignKey(field));
                 Class<?> foreignKeyClass = ReflectionUtils.getFieldType(field);
@@ -300,5 +301,21 @@ abstract public class Entity {
             }
         }
         return entity;
+    }
+
+    public static ResultSet executeQuery(String query) throws SQLException {
+        return DBManager.getSingleton().getConnection().createStatement().executeQuery(query);
+    }
+
+    public static ResultSet executeQuery(SQLQuery query) throws SQLException {
+        return executeQuery(query.toRawString());
+    }
+
+    public static Integer executeUpdate(String query) throws SQLException {
+        return DBManager.getSingleton().getConnection().createStatement().executeUpdate(query);
+    }
+
+    public static Integer executeUpdate(SQLQuery query) throws SQLException {
+        return executeUpdate(query.toRawString());
     }
 }

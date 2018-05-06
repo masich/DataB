@@ -1,6 +1,6 @@
 package entities.base;
 
-import info.KeyStore;
+import entities.base.converters.base.Converter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,13 +8,24 @@ import java.sql.SQLException;
 
 public class DBManager {
     private Connection dbConnection;
+    private Converter converter;
 
-    private DBManager(String dbSrc) throws SQLException {
+    public DBManager(String dbSrc) throws SQLException {
         dbConnection = DriverManager.getConnection(dbSrc);
+
     }
 
     public Connection getConnection() {
         return dbConnection;
+    }
+
+    public DBManager setConverter(Converter converter) {
+        this.converter = converter;
+        return this;
+    }
+
+    public Converter getConverter() {
+        return converter;
     }
 
     public void close() throws SQLException {
@@ -37,12 +48,30 @@ public class DBManager {
 
     private static DBManager managerInstance;
 
-    //Fixme
-    public static DBManager getInstance() throws SQLException {
-        if (managerInstance == null) {
-            managerInstance = new DBManager("jdbc:mysql://localhost/" + KeyStore.DB_NAME + "?" +
-                    "user=" + KeyStore.LOGIN + "&password=" + KeyStore.PASSWORD);
-        }
+    public static DBManager getSingleton() {
         return managerInstance;
+    }
+
+    public static void setSingleton(DBManager dbManager) {
+        managerInstance = dbManager;
+    }
+
+
+    public static class Builder {
+        private DBManager dbManager;
+
+        public Builder addDatabaseSrc(String dbSrc) throws SQLException {
+            this.dbManager = new DBManager(dbSrc);
+            return this;
+        }
+
+        public Builder addConverter(Converter converter) {
+            this.dbManager.converter = converter;
+            return this;
+        }
+
+        public DBManager build() {
+            return dbManager;
+        }
     }
 }

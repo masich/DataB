@@ -99,7 +99,7 @@ public class ReflectionUtils {
 
     }
 
-    public static Class getFieldType(java.lang.reflect.Field field) {
+    public static Class<?> getFieldType(java.lang.reflect.Field field) {
         return field.getType();
     }
 
