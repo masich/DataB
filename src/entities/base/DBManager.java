@@ -12,16 +12,14 @@ public class DBManager {
 
     public DBManager(String dbSrc) throws SQLException {
         dbConnection = DriverManager.getConnection(dbSrc);
-
     }
 
     public Connection getConnection() {
         return dbConnection;
     }
 
-    public DBManager setConverter(Converter converter) {
+    public void setConverter(Converter converter) {
         this.converter = converter;
-        return this;
     }
 
     public Converter getConverter() {
@@ -55,7 +53,6 @@ public class DBManager {
     public static void setSingleton(DBManager dbManager) {
         managerInstance = dbManager;
     }
-
 
     public static class Builder {
         private DBManager dbManager;
