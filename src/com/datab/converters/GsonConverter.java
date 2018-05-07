@@ -1,8 +1,8 @@
-package entities.base.converters;
+package com.datab.converters;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import entities.base.converters.base.Converter;
+import com.datab.converters.base.Converter;
 
 public class GsonConverter implements Converter {
     private Gson gson;

@@ -1,10 +1,10 @@
-package entities.base;
+package com.datab;
 
-import entities.base.converters.base.Converter;
-import entities.base.exceptions.FieldNotFoundException;
-import entities.base.queries.MySQLQuery;
-import entities.base.queries.base.SQLQuery;
-import entities.base.utils.ReflectionUtils;
+import com.datab.converters.base.Converter;
+import com.datab.exceptions.FieldNotFoundException;
+import com.datab.queries.MySQLQuery;
+import com.datab.queries.base.SQLQuery;
+import com.datab.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -48,7 +48,7 @@ abstract public class Entity {
      * Saves an instance with corresponding primary key to appropriate
      * database table.
      *
-     * @param saveRecursively if <code>true</code> inner entities will also be saved.
+     * @param saveRecursively if <code>true</code> inner com will also be saved.
      * @param obj             entity to save.
      */
     //Todo: add exception logging
@@ -73,7 +73,7 @@ abstract public class Entity {
      * Deletes an instance with the same primary key from appropriate
      * database table.
      *
-     * @param deleteRecursively if <code>true</code> inner entities will also be deleted.
+     * @param deleteRecursively if <code>true</code> inner com will also be deleted.
      * @param obj               entity to delete.
      */
     //Todo: add exception logging
@@ -123,12 +123,12 @@ abstract public class Entity {
     }
 
     /**
-     * Returns all of the <code>entityClass</code> entities from the
+     * Returns all of the <code>entityClass</code> com from the
      * appropriate database table. Entities also will be recursively initialized.
      *
      * @param entityClass class of the database table entity.
      * @param <T>         type of the result value. The type of <code>entityClass</code> in this case.
-     * @return all of the entities of the appropriate database table,
+     * @return all of the com of the appropriate database table,
      * emptyList if the database table is empty,
      * <code>null</code> if something went wrong.
      */

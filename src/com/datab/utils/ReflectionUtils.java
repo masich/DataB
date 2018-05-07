@@ -1,11 +1,11 @@
-package entities.base.utils;
+package com.datab.utils;
 
-import entities.base.annotations.Field;
-import entities.base.annotations.ForeignKey;
-import entities.base.annotations.PrimaryKey;
-import entities.base.annotations.Table;
-import entities.base.exceptions.ConstructorNotFoundException;
-import entities.base.exceptions.FieldNotFoundException;
+import com.datab.annotations.Field;
+import com.datab.annotations.ForeignKey;
+import com.datab.annotations.PrimaryKey;
+import com.datab.annotations.Table;
+import com.datab.exceptions.ConstructorNotFoundException;
+import com.datab.exceptions.FieldNotFoundException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

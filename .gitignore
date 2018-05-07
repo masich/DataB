@@ -1,7 +1,4 @@
 .idea/
-Paintball.iml
+*.iml
 out/
 libs/
-src/info/KeyStore.java
-src/test/
-lib/

@@ -1,4 +1,4 @@
-package entities.base.converters.base;
+package com.datab.converters.base;
 
 public interface Converter {
     String convertToString(Object obj);

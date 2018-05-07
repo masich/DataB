@@ -1,4 +1,4 @@
-package entities.base.annotations;
+package com.datab.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Field {
-    //Field name in DB table
+public @interface PrimaryKey {
+    //PrimaryKey name in DB table
     String value();
 }

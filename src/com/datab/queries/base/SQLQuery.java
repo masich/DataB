@@ -1,4 +1,4 @@
-package entities.base.queries.base;
+package com.datab.queries.base;
 
 public abstract class SQLQuery {
     private String rawString;

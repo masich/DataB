@@ -1,6 +1,6 @@
-package entities.base;
+package com.datab;
 
-import entities.base.converters.base.Converter;
+import com.datab.converters.base.Converter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
