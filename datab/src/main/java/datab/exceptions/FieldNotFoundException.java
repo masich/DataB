@@ -1,4 +1,4 @@
-package com.datab.exceptions;
+package datab.exceptions;
 
 public class FieldNotFoundException extends Exception {
     public FieldNotFoundException(String message) {

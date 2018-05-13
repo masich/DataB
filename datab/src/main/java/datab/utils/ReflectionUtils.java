@@ -1,11 +1,11 @@
-package com.datab.utils;
+package datab.utils;
 
-import com.datab.annotations.Field;
-import com.datab.annotations.ForeignKey;
-import com.datab.annotations.PrimaryKey;
-import com.datab.annotations.Table;
-import com.datab.exceptions.ConstructorNotFoundException;
-import com.datab.exceptions.FieldNotFoundException;
+import datab.annotations.Field;
+import datab.annotations.ForeignKey;
+import datab.annotations.PrimaryKey;
+import datab.annotations.Table;
+import datab.exceptions.ConstructorNotFoundException;
+import datab.exceptions.FieldNotFoundException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ReflectionUtils {
     public static java.lang.reflect.Field getPrimaryKeyField(final Class<?> entityClass) throws FieldNotFoundException {
-        List<java.lang.reflect.Field> fields = getAllFields(new ArrayList<>(), entityClass);
+        List<java.lang.reflect.Field> fields = getAllFields(new ArrayList<java.lang.reflect.Field>(), entityClass);
 
         for (java.lang.reflect.Field field : fields)
             if (isPrimaryKey(field))
@@ -69,7 +69,7 @@ public class ReflectionUtils {
     }
 
     public static List<java.lang.reflect.Field> getAllFields(final Class<?> entityClass) {
-        return getAllFields(new ArrayList<>(), entityClass);
+        return getAllFields(new ArrayList<java.lang.reflect.Field>(), entityClass);
     }
 
     public static boolean isPrimaryKey(final java.lang.reflect.Field field) {

@@ -1,10 +1,10 @@
-package com.datab;
+package datab;
 
-import com.datab.converters.base.Converter;
-import com.datab.exceptions.FieldNotFoundException;
-import com.datab.queries.MySQLQuery;
-import com.datab.queries.base.SQLQuery;
-import com.datab.utils.ReflectionUtils;
+import datab.converter.Converter;
+import datab.exceptions.FieldNotFoundException;
+import datab.queries.MySQLQuery;
+import datab.queries.base.SQLQuery;
+import datab.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -57,7 +57,7 @@ abstract public class Entity {
             DBManager dbManager = DBManager.getSingleton();
             dbManager.beginTransaction();
             dbManager.checkForeignKey(false);
-            save(saveRecursively, obj, new HashSet<>());
+            save(saveRecursively, obj, new HashSet<Entity>());
             dbManager.checkForeignKey(true);
             dbManager.finishTransaction();
         } catch (SQLException e) {
@@ -81,7 +81,7 @@ abstract public class Entity {
         try {
             DBManager dbManager = DBManager.getSingleton();
             dbManager.beginTransaction();
-            delete(deleteRecursively, obj, new HashSet<>());
+            delete(deleteRecursively, obj, new HashSet<Entity>());
             dbManager.finishTransaction();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -168,7 +168,7 @@ abstract public class Entity {
                 for (Field field : entityFields) {
                     if (ReflectionUtils.isField(field)) {
                         Object fieldValue = ReflectionUtils.getFieldValue(field, obj);
-                        valuesBuilder.appendUnit(DBManager.getSingleton().getConverter().convertToString(fieldValue));
+                        valuesBuilder.appendUnit(DBManager.getSingleton().getConverterFactory().convertToString(fieldValue));
                     } else if (ReflectionUtils.isForeignKey(field)) {
                         Entity foreignKeyValue = (Entity) ReflectionUtils.getFieldValue(field, obj);
                         if (saveRecursively && foreignKeyValue != null) save(true, foreignKeyValue, saved);
@@ -279,7 +279,7 @@ abstract public class Entity {
 
     private static <T> T initEntity(T entity, ResultSet entityResultSet, Map<Class, Map<Object, Object>> initialized) throws SQLException {
         Class<?> entityClass = entity.getClass();
-        Converter converter = DBManager.getSingleton().getConverter();
+        Converter converter = DBManager.getSingleton().getConverterFactory();
         List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
         for (Field field : entityFields) {
             if (ReflectionUtils.isPrimaryKey(field)) {

@@ -1,6 +1,6 @@
-package com.datab.queries;
+package datab.queries;
 
-import com.datab.queries.base.SQLQuery;
+import datab.queries.base.SQLQuery;
 
 public class MySQLQuery extends SQLQuery {
     public MySQLQuery(String rawString) {

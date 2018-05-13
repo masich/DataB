@@ -1,6 +1,6 @@
-package com.datab;
+package datab;
 
-import com.datab.converters.base.Converter;
+import datab.converter.Converter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 public class DBManager {
     private Connection dbConnection;
-    private Converter converter;
+    private Converter.Factory converterFactory;
 
     public DBManager(String dbSrc) throws SQLException {
         dbConnection = DriverManager.getConnection(dbSrc);
@@ -18,12 +18,12 @@ public class DBManager {
         return dbConnection;
     }
 
-    public void setConverter(Converter converter) {
-        this.converter = converter;
+    public void setConverterFactory(Converter.Factory converterFactory) {
+        this.converterFactory = converterFactory;
     }
 
-    public Converter getConverter() {
-        return converter;
+    public Converter.Factory getConverterFactory() {
+        return converterFactory;
     }
 
     public void close() throws SQLException {
@@ -62,8 +62,8 @@ public class DBManager {
             return this;
         }
 
-        public Builder addConverter(Converter converter) {
-            this.dbManager.converter = converter;
+        public Builder addConverterFactory(Converter.Factory converterFactory) {
+            this.dbManager.converterFactory = converterFactory;
             return this;
         }
 

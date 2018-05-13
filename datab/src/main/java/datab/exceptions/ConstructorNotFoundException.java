@@ -1,4 +1,4 @@
-package com.datab.exceptions;
+package datab.exceptions;
 
 public class ConstructorNotFoundException extends NoSuchMethodException {
     public ConstructorNotFoundException() {
