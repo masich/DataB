@@ -168,7 +168,10 @@ abstract public class Entity {
                 for (Field field : entityFields) {
                     if (ReflectionUtils.isField(field)) {
                         Object fieldValue = ReflectionUtils.getFieldValue(field, obj);
-                        valuesBuilder.appendUnit(DBManager.getSingleton().getConverterFactory().convertToString(fieldValue));
+                        valuesBuilder.appendUnit(DBManager.getSingleton()
+                                .getConverterFactory()
+                                .getConverter()
+                                .convertToString(fieldValue));
                     } else if (ReflectionUtils.isForeignKey(field)) {
                         Entity foreignKeyValue = (Entity) ReflectionUtils.getFieldValue(field, obj);
                         if (saveRecursively && foreignKeyValue != null) save(true, foreignKeyValue, saved);
@@ -279,7 +282,9 @@ abstract public class Entity {
 
     private static <T> T initEntity(T entity, ResultSet entityResultSet, Map<Class, Map<Object, Object>> initialized) throws SQLException {
         Class<?> entityClass = entity.getClass();
-        Converter converter = DBManager.getSingleton().getConverterFactory();
+        Converter converter = DBManager.getSingleton()
+                .getConverterFactory()
+                .getConverter();
         List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
         for (Field field : entityFields) {
             if (ReflectionUtils.isPrimaryKey(field)) {

@@ -3,8 +3,13 @@ package datab.converter.gson;
 import datab.converter.Converter;
 
 public class GsonConverterFactory implements Converter.Factory {
+    private Converter converter;
+
     @Override
     public Converter getConverter() {
-        return new GsonConverter();
+        if (converter == null) {
+            converter = new GsonConverter();
+        }
+        return converter;
     }
 }
