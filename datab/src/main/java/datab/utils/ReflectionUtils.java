@@ -31,12 +31,40 @@ public class ReflectionUtils {
     public static boolean setFieldValue(final java.lang.reflect.Field field, final Object obj, final Object value) {
         try {
             field.setAccessible(true);
-            field.set(obj, value);
+            field.set(obj, cast(value, ReflectionUtils.getFieldClass(field)));
             return true;
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    //FIXME
+    public static Object cast(Object what, Class<?> to) {
+        if (what != null) {
+            Class fromClass = what.getClass();
+            if (fromClass == to) {
+                return what;
+            } else if (Number.class.isAssignableFrom(fromClass)) {
+                Number number = (Number) what;
+                if (to == int.class || to == Integer.class) {
+                    return number.intValue();
+                } else if (to == byte.class || to == Byte.class) {
+                    return number.byteValue();
+                } else if (to == short.class || to == Short.class) {
+                    return number.shortValue();
+                } else if (to == long.class || to == Long.class) {
+                    return number.longValue();
+                } else if (to == float.class || to == Float.class) {
+                    return number.floatValue();
+                } else if (to == double.class || to == Double.class) {
+                    return number.doubleValue();
+                }
+            } else if (to == char.class || to == Character.class) {
+                return what;
+            }
+        }
+        return to.cast(what);
     }
 
     public static <T> Set<Class<? extends T>> getAllSubclassesByPackage(String packageName, Class<T> superClass) {
