@@ -5,7 +5,7 @@ import datab.Entity;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public interface Provider {
+public interface DBProvider {
     String getDBStringPrefix();
 
     void initDB(Connection dbConnection, Iterable<Class<? extends Entity>> entityClasses) throws SQLException;
@@ -19,6 +19,6 @@ public interface Provider {
     SQLQueryProvider getSQLQueryProvider();
 
     interface Factory {
-        Provider getProvider();
+        DBProvider getDBProvider();
     }
 }

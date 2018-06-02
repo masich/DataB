@@ -1,6 +1,6 @@
-package datab.provider;
+package datab.provider.datatype;
 
-public enum DataType {
+public enum SQLiteDataType implements SQLFieldAttributes.DataType {
     INTEGER("INTEGER"),
     TEXT("TEXT"),
     REAL("REAL"),
@@ -9,11 +9,11 @@ public enum DataType {
 
     private String name;
 
-    DataType(String dataTypeName) {
+    SQLiteDataType(String dataTypeName) {
         this.name = dataTypeName;
     }
 
-    public String getName() {
+    public String getSQLName() {
         return name;
     }
 }

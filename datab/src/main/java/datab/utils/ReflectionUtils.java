@@ -110,30 +110,30 @@ public class ReflectionUtils {
     public static Class<?> getFieldType(java.lang.reflect.Field field) {
         return field.getType();
     }
-
-    public static FieldAttributes getFieldAttributes(java.lang.reflect.Field field) {
-        FieldAttributes fieldAttributes = new FieldAttributes();
-        fieldAttributes.setType(getFieldType(field));
-        if (isField(field)) {
-            fieldAttributes.setDescription("FIELD");
-            fieldAttributes.setSqlName(getFieldName(field));
-        } else if (isForeignKey(field)) {
-            fieldAttributes.setDescription("FOREIGN KEY");
-            fieldAttributes.setSqlName(getForeignKey(field));
-        } else if (isPrimaryKey(field)) {
-            fieldAttributes.setDescription("PRIMARY KEY");
-            fieldAttributes.setSqlName(getPrimaryKey(field));
-        }
-        return fieldAttributes;
-    }
-
-    public static List<FieldAttributes> getAllFieldsAttributes(Class<? extends Entity> entityClass) {
-        List<FieldAttributes> entityFieldsTypes = new ArrayList<>();
-        for (java.lang.reflect.Field entityField : getAllFields(entityClass)) {
-            entityFieldsTypes.add(getFieldAttributes(entityField));
-        }
-        return entityFieldsTypes;
-    }
+//
+//    public static FieldAttributes getFieldAttributes(java.lang.reflect.Field field) {
+//        FieldAttributes fieldAttributes = new FieldAttributes();
+//        fieldAttributes.setType(getFieldType(field));
+//        if (isField(field)) {
+//            fieldAttributes.setDescription("FIELD");
+//            fieldAttributes.setSqlName(getFieldName(field));
+//        } else if (isForeignKey(field)) {
+//            fieldAttributes.setDescription("FOREIGN KEY");
+//            fieldAttributes.setSqlName(getForeignKey(field));
+//        } else if (isPrimaryKey(field)) {
+//            fieldAttributes.setDescription("PRIMARY KEY");
+//            fieldAttributes.setSqlName(getPrimaryKey(field));
+//        }
+//        return fieldAttributes;
+//    }
+//
+//    public static List<FieldAttributes> getAllFieldsAttributes(Class<? extends Entity> entityClass) {
+//        List<FieldAttributes> entityFieldsTypes = new ArrayList<>();
+//        for (java.lang.reflect.Field entityField : getAllFields(entityClass)) {
+//            entityFieldsTypes.add(getFieldAttributes(entityField));
+//        }
+//        return entityFieldsTypes;
+//    }
 
     private static List<java.lang.reflect.Field> getAllFields(List<java.lang.reflect.Field> fields, Class<?> entityClass) {
         Collections.addAll(fields, entityClass.getDeclaredFields());
