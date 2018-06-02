@@ -15,17 +15,18 @@ public class GsonConverter implements Converter {
         this(new GsonBuilder().serializeNulls().create());
     }
 
-
     @Override
     public String convertToString(Object obj) {
+        if (obj instanceof String) {
+            return obj.toString();
+        }
         return gson.toJson(obj);
     }
 
     @Override
     public <T> T convertFromString(String rawData, Class<T> convertClass) {
-        if (String.class.isAssignableFrom(convertClass)) {
+        if (String.class.isAssignableFrom(convertClass))
             return (T) rawData;
-        }
         return gson.fromJson(rawData, convertClass);
     }
 }
