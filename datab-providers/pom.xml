@@ -22,6 +22,7 @@
 
     <modules>
         <module>sqlite</module>
+        <module>sqlite-android</module>
     </modules>
 
 </project>
