@@ -92,6 +92,10 @@ public class ReflectionUtils {
         return field.isAnnotationPresent(ForeignKey.class);
     }
 
+    public static Class<?> getPrimaryKeyClass(final Class<?> entity) throws FieldNotFoundException {
+        return ReflectionUtils.getFieldClass(ReflectionUtils.getPrimaryKeyField(entity));
+    }
+
     public static <T> T getNewInstance(final Class<T> entityClass) {
         try {
             Constructor<T> constructor = entityClass.getDeclaredConstructor();
