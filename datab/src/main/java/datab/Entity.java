@@ -1,9 +1,9 @@
 package datab;
 
 import datab.converter.Converter;
-import datab.exceptions.FieldNotFoundException;
-import datab.queries.MySQLQuery;
-import datab.queries.base.SQLQuery;
+import datab.exception.FieldNotFoundException;
+import datab.query.Query;
+import datab.query.SQLQuery;
 import datab.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -12,36 +12,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 abstract public class Entity {
-    /**
-     * Uses recursively saving by default.
-     */
-    public final void save() {
-        save(true);
-    }
-
-    /**
-     * @param saveRecursively if <code>true</code> the recursive saving will be used.
-     */
-    public final void save(boolean saveRecursively) {
-        save(saveRecursively, this);
-    }
-
-    /**
-     * Does not use recursively deletion by default.
-     */
-    public final void delete() {
-        delete(false);
-    }
-
-    /**
-     * @param deleteRecursively if <code>true</code> the recursive deletion will be used.
-     */
-    //Todo: make foreign key NULLABLE in DB as requirement (?)
-    //Fixme: Is recursion delete necessary? You can achieve it using pure DB settings (simply make Constraint on Foreign Key 'CASCADE' on delete)
-    private void delete(boolean deleteRecursively) {
-        delete(deleteRecursively, this);
-    }
-
     /**
      * Saves an entity to appropriate database table.
      * <p>
@@ -56,9 +26,7 @@ abstract public class Entity {
         try {
             DBManager dbManager = DBManager.getSingleton();
             dbManager.beginTransaction();
-            dbManager.checkForeignKey(false);
             save(saveRecursively, obj, new HashSet<Entity>());
-            dbManager.checkForeignKey(true);
             dbManager.finishTransaction();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -97,7 +65,7 @@ abstract public class Entity {
      */
     public static boolean deleteAll(final Class<? extends Entity> entityClass) {
         try {
-            SQLQuery query = new MySQLQuery.Builder()
+            Query query = DBManager.getSingleton().getSQLQueryBuilder()
                     .delete()
                     .from(ReflectionUtils.getTableName(entityClass))
                     .build();
@@ -135,7 +103,7 @@ abstract public class Entity {
     public static <T> List<T> getAll(final Class<T> entityClass) {
         try {
             String tableName = ReflectionUtils.getTableName(entityClass);
-            SQLQuery query = new MySQLQuery.Builder().select().all().from(tableName).build();
+            Query query = DBManager.getSingleton().getSQLQueryBuilder().select().all().from(tableName).build();
             ResultSet entityResultSet = executeQuery(query);
             List<T> allEntities = new ArrayList<>();
             while (entityResultSet.next()) {
@@ -153,18 +121,18 @@ abstract public class Entity {
     //Todo: create entity deleting in exception case
     private static void save(boolean saveRecursively, final Entity obj, Set<Entity> saved) throws SQLException, FieldNotFoundException {
         Class<? extends Entity> entityClass = obj.getClass();
-        SQLQuery query;
+        Query query;
         if (!saved.contains(obj)) {
             if (Entity.class.isAssignableFrom(entityClass)) {
                 saved.add(obj);
                 String tableName = ReflectionUtils.getTableName(entityClass);
                 List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
-                MySQLQuery.Builder queryBuilder = new MySQLQuery.Builder()
+                SQLQuery.Builder queryBuilder = DBManager.getSingleton().getSQLQueryBuilder()
                         .replace()
                         .into()
                         .appendQuery(tableName)
                         .values();
-                MySQLQuery.Chain.Builder valuesBuilder = new MySQLQuery.Chain.Builder();
+                SQLQuery.Chain.Builder valuesBuilder = DBManager.getSingleton().getSQLQueryChainBuilder();
                 for (Field field : entityFields) {
                     if (ReflectionUtils.isField(field)) {
                         Object fieldValue = ReflectionUtils.getFieldValue(field, obj);
@@ -183,7 +151,7 @@ abstract public class Entity {
                 query = queryBuilder.appendQueryPart(valuesBuilder.build()).build();
             } else {
                 //Todo: Serialize another objects
-                query = new MySQLQuery("");
+                query = new SQLQuery("");
             }
             executeUpdate(query);
         }
@@ -192,7 +160,7 @@ abstract public class Entity {
     //Fixme: npe
     private static void delete(boolean deleteRecursively, final Entity obj, Set<Entity> deleted) throws FieldNotFoundException, SQLException {
         Class<? extends Entity> entityClass = obj.getClass();
-        SQLQuery query;
+        Query query;
         if (!deleted.contains(obj)) {
             deleted.add(obj);
             String tableName = ReflectionUtils.getTableName(entityClass);
@@ -212,11 +180,11 @@ abstract public class Entity {
             }
             if (primaryKey == null)
                 throw new FieldNotFoundException("Class " + entityClass.getName() + " has no primary key!");
-            MySQLQuery.Builder queryBuilder = new MySQLQuery.Builder()
+            SQLQuery.Builder queryBuilder = DBManager.getSingleton().getSQLQueryBuilder()
                     .delete()
                     .from(tableName)
                     .where();
-            MySQLQuery.Condition condition = new MySQLQuery.Condition.Builder()
+            SQLQuery.Condition condition = DBManager.getSingleton().getSQLQueryConditionBuilder()
                     .equals(primaryKey, id)
                     .build();
             query = queryBuilder.appendQueryPart(condition).build();
@@ -230,15 +198,15 @@ abstract public class Entity {
                 String tableName = ReflectionUtils.getTableName(entityClass);
                 Field primaryKeyField = ReflectionUtils.getPrimaryKeyField(entityClass);
                 String primaryKey = ReflectionUtils.getPrimaryKey(primaryKeyField);
-                MySQLQuery.Builder queryBuilder = new MySQLQuery.Builder()
+                SQLQuery.Builder queryBuilder = DBManager.getSingleton().getSQLQueryBuilder()
                         .select()
                         .all()
                         .from(tableName)
                         .where();
-                MySQLQuery.Condition condition = new MySQLQuery.Condition.Builder()
+                SQLQuery.Condition condition = DBManager.getSingleton().getSQLQueryConditionBuilder()
                         .equals(primaryKey, id)
                         .build();
-                SQLQuery query = queryBuilder.appendQueryPart(condition).build();
+                Query query = queryBuilder.appendQueryPart(condition).build();
                 ResultSet entityResultSet = executeQuery(query);
                 if (!entityResultSet.next()) return null;
                 T entity = ReflectionUtils.getNewInstance(entityClass);
@@ -312,7 +280,7 @@ abstract public class Entity {
         return DBManager.getSingleton().getConnection().createStatement().executeQuery(query);
     }
 
-    public static ResultSet executeQuery(SQLQuery query) throws SQLException {
+    public static ResultSet executeQuery(Query query) throws SQLException {
         return executeQuery(query.toRawString());
     }
 
@@ -320,7 +288,37 @@ abstract public class Entity {
         return DBManager.getSingleton().getConnection().createStatement().executeUpdate(query);
     }
 
-    public static Integer executeUpdate(SQLQuery query) throws SQLException {
+    public static Integer executeUpdate(Query query) throws SQLException {
         return executeUpdate(query.toRawString());
+    }
+
+    /**
+     * Uses recursively saving by default.
+     */
+    public final void save() {
+        save(true);
+    }
+
+    /**
+     * @param saveRecursively if <code>true</code> the recursive saving will be used.
+     */
+    public final void save(boolean saveRecursively) {
+        save(saveRecursively, this);
+    }
+
+    /**
+     * Does not use recursively deletion by default.
+     */
+    public final void delete() {
+        delete(false);
+    }
+
+    /**
+     * @param deleteRecursively if <code>true</code> the recursive deletion will be used.
+     */
+    //Todo: make foreign key NULLABLE in DB as requirement (?)
+    //Fixme: Is recursion delete necessary? You can achieve it using pure DB settings (simply make Constraint on Foreign Key 'CASCADE' on delete)
+    private void delete(boolean deleteRecursively) {
+        delete(deleteRecursively, this);
     }
 }

@@ -3,19 +3,25 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>parent</artifactId>
         <groupId>com.max.datab</groupId>
-        <artifactId>datab-converters</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>converter-gson</artifactId>
+    <artifactId>datab-providers</artifactId>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>datab</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
+
+    <modules>
+        <module>sqlite</module>
+    </modules>
+
 </project>

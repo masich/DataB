@@ -1,18 +1,20 @@
-package datab.queries;
+package datab.query;
 
-import datab.queries.base.SQLQuery;
+public class SQLQuery extends Query {
+    public SQLQuery() {
+        this("");
+    }
 
-public class MySQLQuery extends SQLQuery {
-    public MySQLQuery(String rawString) {
+    public SQLQuery(String rawString) {
         super(rawString);
     }
 
     private static String toSQLValue(Object object) {
-        String quotes = object == null ? ""  : "\'";
-        return new StringBuffer(quotes).append(object).append(quotes).toString();
+        String quotes = object == null ? "" : "\'";
+        return quotes + object + quotes;
     }
 
-    public static class Builder extends SQLQuery.Builder<MySQLQuery> {
+    public static class Builder extends Query.Builder<SQLQuery> {
 
         public Builder() {
             super();
@@ -22,17 +24,20 @@ public class MySQLQuery extends SQLQuery {
             super(initialQuery);
         }
 
-        @Override
-        public MySQLQuery build() {
-            return new MySQLQuery(rawQuery.toString());
+        public SQLQuery build() {
+            return new SQLQuery(rawQuery.toString());
+        }
+
+        public Builder create() {
+            return appendQuery("CREATE");
         }
 
         public Builder select() {
-            return appendQuery("SELECT ");
+            return appendQuery("SELECT");
         }
 
         public Builder insert() {
-            return appendQuery("INSERT ");
+            return appendQuery("INSERT");
         }
 
         public Builder replace() {
@@ -90,7 +95,7 @@ public class MySQLQuery extends SQLQuery {
     }
 
     /**
-     * Class that represents parts of queries like <code>(A, B, C)</code>
+     * Class that represents parts of query like <code>(A, B, C)</code>
      */
     public static class Chain extends QueryPart {
         public Chain(String rawString) {
@@ -99,9 +104,15 @@ public class MySQLQuery extends SQLQuery {
 
         public static class Builder extends QueryPart.Builder<Chain> {
             private static String DIVIDER = ", ";
+            private boolean isValues;
+
+            public Builder(boolean isSQLValues) {
+                super("(");
+                this.isValues = isSQLValues;
+            }
 
             public Builder() {
-                super("(");
+                this(true);
             }
 
             public Builder(String initialPart) {
@@ -110,7 +121,12 @@ public class MySQLQuery extends SQLQuery {
             }
 
             public Builder appendUnit(Object rawUnit) {
-                this.rawQuery.append(DIVIDER).append(toSQLValue(rawUnit));
+                this.rawQuery.append(DIVIDER).append(isValues ? toSQLValue(rawUnit) : rawUnit);
+                return this;
+            }
+
+            public Builder setIsValues(boolean isValues) {
+                this.isValues = isValues;
                 return this;
             }
 
@@ -127,15 +143,14 @@ public class MySQLQuery extends SQLQuery {
             super(rawString);
         }
 
-        //Todo: refactor me; replace 'a' param type by String because it is a column identifier (?)
         public static class Builder extends QueryPart.Builder<Condition> {
 
-            public Builder equals(Object a, Object b) {
-                return appendCondition(a, '=', b);
+            public Builder equals(Object column, Object b) {
+                return appendCondition(column, '=', b);
             }
 
-            public Builder like(Object a, Object b) {
-                return appendCondition(a, "LIKE", b);
+            public Builder like(Object column, Object b) {
+                return appendCondition(column, "LIKE", b);
             }
 
             public Builder and() {
