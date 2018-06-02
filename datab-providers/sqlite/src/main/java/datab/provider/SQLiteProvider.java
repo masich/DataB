@@ -5,6 +5,7 @@ import datab.provider.datatype.SQLFieldAttributes;
 import datab.provider.datatype.SQLiteAttributesConverter;
 import datab.query.SQLQuery;
 import datab.utils.ReflectionUtils;
+import org.sqlite.JDBC;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,9 +14,17 @@ import java.sql.SQLException;
 public class SQLiteProvider implements DBProvider {
     private SQLiteQueryProvider sqlQueryProvider;
 
+    static {
+        try {
+            DriverManager.registerDriver(new JDBC());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public String getDBStringPrefix() {
-        return "jdbc:sqlite:";
+        return JDBC.PREFIX;
     }
 
     @Override
