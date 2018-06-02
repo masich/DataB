@@ -1,7 +1,7 @@
 package datab;
 
 import datab.converter.Converter;
-import datab.provider.Provider;
+import datab.provider.DBProvider;
 import datab.provider.SQLQueryProvider;
 import datab.query.SQLQuery;
 import datab.utils.ReflectionUtils;
@@ -16,7 +16,7 @@ public class DBManager implements SQLQueryProvider {
     private String entityPackageName;
     private Connection dbConnection;
     private Converter.Factory converterFactory;
-    private Provider.Factory providerFactory;
+    private DBProvider.Factory providerFactory;
 
     private DBManager() {
     }
@@ -37,7 +37,12 @@ public class DBManager implements SQLQueryProvider {
     }
 
     public void initDB() throws SQLException {
-        providerFactory.getProvider().initDB(getConnection(),
+        providerFactory.getDBProvider().initDB(getConnection(),
+                ReflectionUtils.getAllSubclassesByPackage(entityPackageName, Entity.class));
+    }
+
+    public void dropDB() throws SQLException {
+        providerFactory.getDBProvider().dropDB(getConnection(),
                 ReflectionUtils.getAllSubclassesByPackage(entityPackageName, Entity.class));
     }
 
@@ -71,11 +76,11 @@ public class DBManager implements SQLQueryProvider {
         this.converterFactory = converterFactory;
     }
 
-    public Provider.Factory getProviderFactory() {
+    public DBProvider.Factory getProviderFactory() {
         return providerFactory;
     }
 
-    public void setProviderFactory(Provider.Factory providerFactory) {
+    public void setProviderFactory(DBProvider.Factory providerFactory) {
         this.providerFactory = providerFactory;
     }
 
@@ -104,17 +109,17 @@ public class DBManager implements SQLQueryProvider {
 
     @Override
     public SQLQuery.Builder getSQLQueryBuilder() {
-        return getProviderFactory().getProvider().getSQLQueryProvider().getSQLQueryBuilder();
+        return getProviderFactory().getDBProvider().getSQLQueryProvider().getSQLQueryBuilder();
     }
 
     @Override
     public SQLQuery.Chain.Builder getSQLQueryChainBuilder() {
-        return getProviderFactory().getProvider().getSQLQueryProvider().getSQLQueryChainBuilder();
+        return getProviderFactory().getDBProvider().getSQLQueryProvider().getSQLQueryChainBuilder();
     }
 
     @Override
     public SQLQuery.Condition.Builder getSQLQueryConditionBuilder() {
-        return getProviderFactory().getProvider().getSQLQueryProvider().getSQLQueryConditionBuilder();
+        return getProviderFactory().getDBProvider().getSQLQueryProvider().getSQLQueryConditionBuilder();
     }
 
     private Connection getNewConnection(String dbSrc, String login, String password) throws SQLException {
@@ -143,7 +148,7 @@ public class DBManager implements SQLQueryProvider {
             return this;
         }
 
-        public Builder addProviderFactory(Provider.Factory providerFactory) {
+        public Builder addProviderFactory(DBProvider.Factory providerFactory) {
             this.dbManager.setProviderFactory(providerFactory);
             return this;
         }

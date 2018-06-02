@@ -1,6 +1,6 @@
 package datab.query;
 
-public class SQLQuery extends Query {
+public final class SQLQuery extends Query {
     public SQLQuery() {
         this("");
     }
