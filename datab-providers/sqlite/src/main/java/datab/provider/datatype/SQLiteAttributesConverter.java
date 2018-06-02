@@ -1,13 +1,12 @@
 package datab.provider.datatype;
 
+import datab.exception.FieldNotFoundException;
 import datab.utils.JavaDataTypes;
 import datab.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-
-import static datab.utils.ReflectionUtils.isForeignKey;
 
 public class SQLiteAttributesConverter implements SQLFieldAttributes.Converter {
     @Override
@@ -33,20 +32,26 @@ public class SQLiteAttributesConverter implements SQLFieldAttributes.Converter {
     @Override
     public SQLFieldAttributes fromClassField(Field field) {
         SQLFieldAttributes attributes = new SQLFieldAttributes();
-        attributes.setSQLDataType(fromJavaClass(field.getType()));
+        Class<?> typeClass = ReflectionUtils.getFieldClass(field);
         if (ReflectionUtils.isField(field)) {
             attributes.setSQLSense(SQLFieldAttributes.Sense.FIELD);
             attributes.setSQLName(ReflectionUtils.getFieldName(field));
-        } else if (isForeignKey(field)) {
+        } else if (ReflectionUtils.isForeignKey(field)) {
             attributes.setSQLSense(SQLFieldAttributes.Sense.FOREIGN_KEY);
             attributes.setSQLName(ReflectionUtils.getForeignKey(field));
+            try {
+                typeClass = ReflectionUtils.getPrimaryKeyClass(typeClass);
+            } catch (FieldNotFoundException e) {
+                e.printStackTrace();
+            }
         } else if (ReflectionUtils.isPrimaryKey(field)) {
             attributes.setSQLSense(SQLFieldAttributes.Sense.PRIMARY_KEY);
             attributes.setSQLName(ReflectionUtils.getPrimaryKey(field));
         }
 
-        return attributes;
+        attributes.setSQLDataType(fromJavaClass(typeClass));
 
+        return attributes;
     }
 
     @Override

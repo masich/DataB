@@ -1,7 +1,7 @@
 package datab.provider;
 
 public class SQLiteProviderFactory implements DBProvider.Factory {
-    private DBProvider DBProvider;
+    protected DBProvider DBProvider;
 
     @Override
     public DBProvider getDBProvider() {

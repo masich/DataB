@@ -7,6 +7,7 @@ import datab.query.SQLQuery;
 import datab.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -260,7 +261,7 @@ abstract public class Entity {
                         entityResultSet.getObject(ReflectionUtils.getPrimaryKey(field)));
             } else if (ReflectionUtils.isField(field)) {
                 String fieldName = ReflectionUtils.getFieldName(field);
-                Class<?> fieldType = ReflectionUtils.getFieldType(field);
+                Type fieldType = ReflectionUtils.getFieldType(field);
                 Object result = entityResultSet.getObject(fieldName);
                 if (result instanceof String) {
                     result = converter.convertFromString((String) result, fieldType);
@@ -268,7 +269,7 @@ abstract public class Entity {
                 ReflectionUtils.setFieldValue(field, entity, result);
             } else if (ReflectionUtils.isForeignKey(field)) {
                 Object foreignKeyId = entityResultSet.getObject(ReflectionUtils.getForeignKey(field));
-                Class<?> foreignKeyClass = ReflectionUtils.getFieldType(field);
+                Class<?> foreignKeyClass = ReflectionUtils.getFieldClass(field);
                 Object foreignKeyObject = getById(foreignKeyId, foreignKeyClass, initialized);
                 ReflectionUtils.setFieldValue(field, entity, foreignKeyObject);
             }
