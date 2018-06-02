@@ -1,17 +1,20 @@
 package datab.utils;
 
-import datab.annotations.Field;
-import datab.annotations.ForeignKey;
-import datab.annotations.PrimaryKey;
-import datab.annotations.Table;
-import datab.exceptions.ConstructorNotFoundException;
-import datab.exceptions.FieldNotFoundException;
+import datab.Entity;
+import datab.annotation.Field;
+import datab.annotation.ForeignKey;
+import datab.annotation.PrimaryKey;
+import datab.annotation.Table;
+import datab.exception.ConstructorNotFoundException;
+import datab.exception.FieldNotFoundException;
+import org.reflections.Reflections;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 
 public class ReflectionUtils {
@@ -34,6 +37,11 @@ public class ReflectionUtils {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static <T> Set<Class<? extends T>> getAllSubclassesByPackage(String packageName, Class<T> superClass) {
+        Reflections reflections = new Reflections(packageName);
+        return reflections.getSubTypesOf(superClass);
     }
 
     public static Object getFieldValue(final java.lang.reflect.Field field, final Object obj) {
@@ -101,6 +109,30 @@ public class ReflectionUtils {
 
     public static Class<?> getFieldType(java.lang.reflect.Field field) {
         return field.getType();
+    }
+
+    public static FieldAttributes getFieldAttributes(java.lang.reflect.Field field) {
+        FieldAttributes fieldAttributes = new FieldAttributes();
+        fieldAttributes.setType(getFieldType(field));
+        if (isField(field)) {
+            fieldAttributes.setDescription("FIELD");
+            fieldAttributes.setSqlName(getFieldName(field));
+        } else if (isForeignKey(field)) {
+            fieldAttributes.setDescription("FOREIGN KEY");
+            fieldAttributes.setSqlName(getForeignKey(field));
+        } else if (isPrimaryKey(field)) {
+            fieldAttributes.setDescription("PRIMARY KEY");
+            fieldAttributes.setSqlName(getPrimaryKey(field));
+        }
+        return fieldAttributes;
+    }
+
+    public static List<FieldAttributes> getAllFieldsAttributes(Class<? extends Entity> entityClass) {
+        List<FieldAttributes> entityFieldsTypes = new ArrayList<>();
+        for (java.lang.reflect.Field entityField : getAllFields(entityClass)) {
+            entityFieldsTypes.add(getFieldAttributes(entityField));
+        }
+        return entityFieldsTypes;
     }
 
     private static List<java.lang.reflect.Field> getAllFields(List<java.lang.reflect.Field> fields, Class<?> entityClass) {

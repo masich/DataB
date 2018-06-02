@@ -1,9 +1,9 @@
-package datab.queries.base;
+package datab.query;
 
-public abstract class SQLQuery {
+public abstract class Query {
     private String rawString;
 
-    public SQLQuery(String rawString) {
+    public Query(String rawString) {
         this.rawString = rawString;
     }
 
@@ -11,7 +11,7 @@ public abstract class SQLQuery {
         return rawString;
     }
 
-    public abstract static class Builder<T extends SQLQuery> {
+    public abstract static class Builder<T extends Query> {
         protected StringBuffer rawQuery;
 
         public Builder() {
@@ -26,12 +26,12 @@ public abstract class SQLQuery {
     }
 
 
-    public static abstract class QueryPart extends SQLQuery {
+    public static abstract class QueryPart extends Query {
         public QueryPart(String rawString) {
             super(rawString);
         }
 
-        public static abstract class Builder<T extends QueryPart> extends SQLQuery.Builder<T> {
+        public static abstract class Builder<T extends QueryPart> extends Query.Builder<T> {
             public Builder() {
                 super();
             }
