@@ -6,6 +6,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public interface DBProvider {
+    /**
+     * @return DataBase scheme prefix in format <code>jdbc:DB_SCHEME:</code>
+     */
     String getDBStringPrefix();
 
     void initDB(Connection dbConnection, Iterable<Class<? extends Entity>> entityClasses) throws SQLException;

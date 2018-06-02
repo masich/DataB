@@ -84,12 +84,6 @@ public class DBManager implements SQLQueryProvider {
         this.providerFactory = providerFactory;
     }
 
-    //Todo: remove it
-//    public void checkForeignKey(boolean check) throws SQLException {
-//        dbConnection.createStatement()
-//                .execute("SET FOREIGN_KEY_CHECKS = " + (check ? "1" : "0"));
-//    }
-
     public void close() throws SQLException {
         dbConnection.close();
     }
@@ -154,6 +148,11 @@ public class DBManager implements SQLQueryProvider {
         }
 
         public DBManager build() throws SQLException {
+            String dbSrc = dbManager.databaseSrc;
+            String dbPrefix = dbManager.providerFactory.getDBProvider().getDBStringPrefix();
+            if (!dbSrc.startsWith(dbPrefix)) {
+                dbManager.databaseSrc = dbPrefix + dbSrc;
+            }
             dbManager.initDB();
             return dbManager;
         }

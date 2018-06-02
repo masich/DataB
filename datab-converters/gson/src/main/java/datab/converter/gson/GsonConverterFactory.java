@@ -7,9 +7,8 @@ public class GsonConverterFactory implements Converter.Factory {
 
     @Override
     public Converter getConverter() {
-        if (converter == null) {
+        if (converter == null)
             converter = new GsonConverter();
-        }
         return converter;
     }
 }

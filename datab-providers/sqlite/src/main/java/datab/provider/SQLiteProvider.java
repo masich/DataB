@@ -74,11 +74,11 @@ public class SQLiteProvider implements DBProvider {
             chainBuilder.appendUnit(getFullDescription(attributes));
         }
 
-        SQLQuery.Builder queryBuilder = queryProvider.getSQLQueryBuilder()
+        SQLQuery query = queryProvider.getSQLQueryBuilder()
                 .createTableIfNotExists(ReflectionUtils.getTableName(entityClass))
-                .appendQueryPart(chainBuilder.build());
+                .appendQueryPart(chainBuilder.build()).build();
 
-        connection.createStatement().execute(queryBuilder.build().toRawString());
+        connection.createStatement().execute(query.toRawString());
     }
 
     void dropTableIfExists(Connection connection, Class<? extends Entity> entityClass) throws SQLException {
@@ -91,6 +91,6 @@ public class SQLiteProvider implements DBProvider {
 
     String getFullDescription(SQLFieldAttributes attributes) {
         return attributes.getSqlName() + " " + attributes.getSQLDataType().getSQLName()
-                + (attributes.getSQLSense() == SQLFieldAttributes.Sense.PRIMARY_KEY ? "PRIMARY KEY" : "");
+                + (attributes.getSQLSense() == SQLFieldAttributes.Sense.PRIMARY_KEY ? " PRIMARY KEY" : "");
     }
 }
