@@ -1,9 +1,8 @@
-package datab.provider;
+package com.masich.datab.provider;
 
 import com.masich.datab.Entity;
-import com.masich.datab.provider.DBProvider;
 import com.masich.datab.provider.datatype.SQLFieldAttributes;
-import datab.provider.datatype.SQLiteAttributesConverter;
+import com.masich.datab.provider.datatype.SQLiteAttributesConverter;
 import com.masich.datab.query.SQLQuery;
 import com.masich.datab.utils.ReflectionUtils;
 import org.sqlite.JDBC;

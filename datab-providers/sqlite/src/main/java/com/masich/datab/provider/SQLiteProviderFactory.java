@@ -1,6 +1,4 @@
-package datab.provider;
-
-import com.masich.datab.provider.DBProvider;
+package com.masich.datab.provider;
 
 public class SQLiteProviderFactory implements com.masich.datab.provider.DBProvider.Factory {
     protected DBProvider DBProvider;

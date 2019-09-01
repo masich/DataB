@@ -1,6 +1,4 @@
-package datab.query;
-
-import com.masich.datab.query.SQLQuery;
+package com.masich.datab.query;
 
 public class SQLiteQueryBuilder extends SQLQuery.Builder {
     public SQLiteQueryBuilder createTableIfNotExists(String tableName) {

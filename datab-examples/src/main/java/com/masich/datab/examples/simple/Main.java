@@ -3,7 +3,7 @@ package com.masich.datab.examples.simple;
 import com.masich.datab.DBManager;
 import com.masich.datab.converter.gson.GsonConverterFactory;
 import com.masich.datab.examples.simple.models.Person;
-import datab.provider.SQLiteProviderFactory;
+import com.masich.datab.provider.SQLiteProviderFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

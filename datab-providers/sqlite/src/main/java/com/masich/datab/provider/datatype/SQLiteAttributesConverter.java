@@ -1,7 +1,6 @@
-package datab.provider.datatype;
+package com.masich.datab.provider.datatype;
 
 import com.masich.datab.exception.FieldNotFoundException;
-import com.masich.datab.provider.datatype.SQLFieldAttributes;
 import com.masich.datab.utils.JavaDataTypes;
 import com.masich.datab.utils.ReflectionUtils;
 

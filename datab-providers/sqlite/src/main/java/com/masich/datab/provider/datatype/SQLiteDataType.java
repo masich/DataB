@@ -1,4 +1,4 @@
-package datab.provider.datatype;
+package com.masich.datab.provider.datatype;
 
 import com.masich.datab.provider.datatype.SQLFieldAttributes;
 

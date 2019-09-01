@@ -1,4 +1,4 @@
-package datab.provider;
+package com.masich.datab.provider;
 
 import org.sqldroid.SQLDroidDriver;
 

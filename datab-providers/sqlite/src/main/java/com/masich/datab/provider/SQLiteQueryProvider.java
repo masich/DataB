@@ -1,8 +1,7 @@
-package datab.provider;
+package com.masich.datab.provider;
 
-import com.masich.datab.provider.SQLQueryProvider;
 import com.masich.datab.query.SQLQuery;
-import datab.query.SQLiteQueryBuilder;
+import com.masich.datab.query.SQLiteQueryBuilder;
 
 public class SQLiteQueryProvider implements SQLQueryProvider {
     @Override

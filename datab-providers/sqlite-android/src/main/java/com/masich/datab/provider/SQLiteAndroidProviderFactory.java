@@ -1,4 +1,4 @@
-package datab.provider;
+package com.masich.datab.provider;
 
 public class SQLiteAndroidProviderFactory extends SQLiteProviderFactory {
     @Override
