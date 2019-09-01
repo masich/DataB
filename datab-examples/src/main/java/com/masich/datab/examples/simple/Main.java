@@ -19,15 +19,21 @@ public class Main {
 
         max.save();
         bob.save();
-        System.out.println(Person.getById(maxTel, Person.class)); //Person{name='Max', phoneNumber='160-332'}
-        System.out.println(Person.getAll(Person.class));          //[Person{name='Max', phoneNumber='160-332'}, Person{name='Bob', phoneNumber='161-200'}]
+
+        //Person{name='Max', phoneNumber='160-332'}
+        System.out.println(Person.getById(maxTel, Person.class));
+        //[Person{name='Max', phoneNumber='160-332'}, Person{name='Bob', phoneNumber='161-200'}]
+        System.out.println(Person.getAll(Person.class));
 
         max.delete();
-        System.out.println(Person.getById(maxTel, Person.class)); //null
-        System.out.println(Person.getAll(Person.class));          //[Person{name='Bob', phoneNumber='161-200'}]
+        //null
+        System.out.println(Person.getById(maxTel, Person.class));
+        //[Person{name='Bob', phoneNumber='161-200'}]
+        System.out.println(Person.getAll(Person.class));
 
         bob.delete();
-        System.out.println(Person.getAll(Person.class));          //[]
+        //[]
+        System.out.println(Person.getAll(Person.class));
 
         List<Person> people = new ArrayList<>();
         people.add(max);
@@ -36,17 +42,24 @@ public class Main {
         people.add(new Person("Julia", "162-112"));
 
         Person.saveAll(people);
-        System.out.println(Person.getAll(Person.class));          //[Person{name='Max', phoneNumber='160-332'}, Person{name='Bob', phoneNumber='161-200'}, Person{name='Lara', phoneNumber='163-213'}, Person{name='Julia', phoneNumber='162-112'}]
+
+        //[Person{name='Max', phoneNumber='160-332'}, Person{name='Bob', phoneNumber='161-200'},
+        //Person{name='Lara', phoneNumber='163-213'}, Person{name='Julia', phoneNumber='162-112'}]
+        System.out.println(Person.getAll(Person.class));
 
         Person.deleteAll(Person.class);
-        System.out.println(Person.getAll(Person.class));          //[]
+        //[]
+        System.out.println(Person.getAll(Person.class));
     }
 
     private static void initDB() throws SQLException {
         DBManager manager = new DBManager.Builder()
-                .addProviderFactory(new SQLiteProviderFactory())    //Provider for your type of database
-                .addDatabaseSrc("sample.db")                        //Path to your database. You also can use a full path like "jdbc:sqlite:sample.db"
-                .addConverterFactory(new GsonConverterFactory())    //Converter for saving custom classes (which are not DataB Entities) into database
+                //Provider for your type of database
+                .addProviderFactory(new SQLiteProviderFactory())
+                //Path to your database. You also can use a full path like "jdbc:sqlite:sample.db"
+                .addDatabaseSrc("sample.db")
+                //Converter for saving custom classes (which are not DataB Entities) into database
+                .addConverterFactory(new GsonConverterFactory())
                 .build();
 
         DBManager.setSingleton(manager);
