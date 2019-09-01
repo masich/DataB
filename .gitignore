@@ -4,7 +4,8 @@
 eclipsebin
 target
 */target
-/databtest/*
+/datab-tests/*
+/**/*.db
 
 pom.xml.*
 release.properties
