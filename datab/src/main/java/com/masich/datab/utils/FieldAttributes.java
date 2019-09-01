@@ -1,4 +1,4 @@
-package datab.utils;
+package com.masich.datab.utils;
 
 //public class FieldAttributes {
 //    private String sqlName;

@@ -1,4 +1,4 @@
-package datab.utils;
+package com.masich.datab.utils;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,10 +1,11 @@
 package datab.provider;
 
-import datab.Entity;
-import datab.provider.datatype.SQLFieldAttributes;
+import com.masich.datab.Entity;
+import com.masich.datab.provider.DBProvider;
+import com.masich.datab.provider.datatype.SQLFieldAttributes;
 import datab.provider.datatype.SQLiteAttributesConverter;
-import datab.query.SQLQuery;
-import datab.utils.ReflectionUtils;
+import com.masich.datab.query.SQLQuery;
+import com.masich.datab.utils.ReflectionUtils;
 import org.sqlite.JDBC;
 
 import java.sql.Connection;

@@ -1,8 +1,9 @@
 package datab.provider.datatype;
 
-import datab.exception.FieldNotFoundException;
-import datab.utils.JavaDataTypes;
-import datab.utils.ReflectionUtils;
+import com.masich.datab.exception.FieldNotFoundException;
+import com.masich.datab.provider.datatype.SQLFieldAttributes;
+import com.masich.datab.utils.JavaDataTypes;
+import com.masich.datab.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

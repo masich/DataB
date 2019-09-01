@@ -1,6 +1,6 @@
-package datab.converter.gson;
+package com.masich.datab.converter.gson;
 
-import datab.converter.Converter;
+import com.masich.datab.converter.Converter;
 
 public class GsonConverterFactory implements Converter.Factory {
     private Converter converter;

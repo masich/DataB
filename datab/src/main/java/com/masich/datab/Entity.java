@@ -1,10 +1,10 @@
-package datab;
+package com.masich.datab;
 
-import datab.converter.Converter;
-import datab.exception.FieldNotFoundException;
-import datab.query.Query;
-import datab.query.SQLQuery;
-import datab.utils.ReflectionUtils;
+import com.masich.datab.converter.Converter;
+import com.masich.datab.exception.FieldNotFoundException;
+import com.masich.datab.query.Query;
+import com.masich.datab.query.SQLQuery;
+import com.masich.datab.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -19,15 +19,50 @@ abstract public class Entity {
      * Saves an instance with corresponding primary key to appropriate
      * database table.
      *
-     * @param saveRecursively if <code>true</code> inner com will also be saved.
-     * @param obj             entity to save.
+     * @param saveRecursively if <code>true</code> inner entities will also be saved.
+     * @param entity          entity to save.
      */
     //Todo: add exception logging
-    public static void save(boolean saveRecursively, final Entity obj) {
+    public static void save(boolean saveRecursively, final Entity entity) {
         try {
             DBManager dbManager = DBManager.getSingleton();
             dbManager.beginTransaction();
-            save(saveRecursively, obj, new HashSet<Entity>());
+            save(saveRecursively, entity, new HashSet<Entity>());
+            dbManager.finishTransaction();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (FieldNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Saves (recursively by default) an iterable data structure of entities to the appropriate database table(s).
+     * <p>
+     * Saves the instances with corresponding primary key to the appropriate
+     * database table(s). Simply calls {@link #saveAll(boolean, Iterable)} with a <code>true</code>
+     * value for a boolean saveRecursively.
+     *
+     * @param entities entities to save.
+     */
+    public static void saveAll(final Iterable<? extends Entity> entities) {
+        saveAll(true, entities);
+    }
+
+    /**
+     * Saves an iterable data structure of entities to the appropriate database table(s).
+     * <p>
+     * Saves the instances with corresponding primary key to the appropriate
+     * database table(s).
+     *
+     * @param saveRecursively if <code>true</code> inner entities will also be saved.
+     * @param entities        entities to save.
+     */
+    public static void saveAll(boolean saveRecursively, final Iterable<? extends Entity> entities) {
+        try {
+            DBManager dbManager = DBManager.getSingleton();
+            dbManager.beginTransaction();
+            saveAll(saveRecursively, entities, new HashSet<Entity>());
             dbManager.finishTransaction();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -42,7 +77,7 @@ abstract public class Entity {
      * Deletes an instance with the same primary key from appropriate
      * database table.
      *
-     * @param deleteRecursively if <code>true</code> inner com will also be deleted.
+     * @param deleteRecursively if <code>true</code> inner entities will also be deleted.
      * @param obj               entity to delete.
      */
     //Todo: add exception logging
@@ -121,9 +156,9 @@ abstract public class Entity {
 
     //Todo: create entity deleting in exception case
     private static void save(boolean saveRecursively, final Entity obj, Set<Entity> saved) throws SQLException, FieldNotFoundException {
-        Class<? extends Entity> entityClass = obj.getClass();
         Query query;
         if (!saved.contains(obj)) {
+            Class<? extends Entity> entityClass = obj.getClass();
             if (Entity.class.isAssignableFrom(entityClass)) {
                 saved.add(obj);
                 String tableName = ReflectionUtils.getTableName(entityClass);
@@ -155,6 +190,12 @@ abstract public class Entity {
                 query = new SQLQuery("");
             }
             executeUpdate(query);
+        }
+    }
+
+    private static void saveAll(boolean saveRecursively, final Iterable<? extends Entity> entities, Set<Entity> saved) throws SQLException, FieldNotFoundException {
+        for (Entity entity : entities) {
+            save(saveRecursively, entity, saved);
         }
     }
 

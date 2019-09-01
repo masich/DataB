@@ -1,10 +1,10 @@
-package datab;
+package com.masich.datab;
 
-import datab.converter.Converter;
-import datab.provider.DBProvider;
-import datab.provider.SQLQueryProvider;
-import datab.query.SQLQuery;
-import datab.utils.ReflectionUtils;
+import com.masich.datab.converter.Converter;
+import com.masich.datab.provider.DBProvider;
+import com.masich.datab.provider.SQLQueryProvider;
+import com.masich.datab.query.SQLQuery;
+import com.masich.datab.utils.ReflectionUtils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,12 +13,16 @@ import java.sql.SQLException;
 public class DBManager implements SQLQueryProvider {
     private static DBManager managerInstance;
     private String databaseSrc;
-    private String entityPackageName;
+    private String entityPackageName = "";
     private Connection dbConnection;
     private Converter.Factory converterFactory;
     private DBProvider.Factory providerFactory;
 
     private DBManager() {
+    }
+
+    public DBManager(String databaseSrc) throws SQLException {
+        this("", databaseSrc);
     }
 
     public DBManager(String entityPackageName, String databaseSrc) throws SQLException {
@@ -148,10 +152,12 @@ public class DBManager implements SQLQueryProvider {
         }
 
         public DBManager build() throws SQLException {
-            String dbSrc = dbManager.databaseSrc;
+            if(dbManager.providerFactory == null) {
+                throw new NullPointerException("ProviderFactory cannot be null. Please, provide it by using addProviderFactory() method");
+            }
             String dbPrefix = dbManager.providerFactory.getDBProvider().getDBStringPrefix();
-            if (!dbSrc.startsWith(dbPrefix)) {
-                dbManager.databaseSrc = dbPrefix + dbSrc;
+            if (!dbManager.databaseSrc.startsWith(dbPrefix)) {
+                dbManager.databaseSrc = dbPrefix + dbManager.databaseSrc;
             }
             dbManager.initDB();
             return dbManager;

@@ -1,4 +1,4 @@
-package datab.provider.datatype;
+package com.masich.datab.provider.datatype;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -51,7 +51,7 @@ public class SQLFieldAttributes {
         String getSQLName();
     }
 
-    interface Converter {
+    public interface Converter {
         DataType fromJavaClass(Class<?> typeClass);
 
         List<DataType> fromJavaClasses(Iterable<Class<?>> typeClasses);

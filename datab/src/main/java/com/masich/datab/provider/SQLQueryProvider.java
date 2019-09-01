@@ -1,6 +1,6 @@
-package datab.provider;
+package com.masich.datab.provider;
 
-import datab.query.SQLQuery;
+import com.masich.datab.query.SQLQuery;
 
 public interface SQLQueryProvider {
     SQLQuery.Builder getSQLQueryBuilder();

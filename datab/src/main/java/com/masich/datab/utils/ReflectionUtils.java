@@ -1,11 +1,11 @@
-package datab.utils;
+package com.masich.datab.utils;
 
-import datab.annotation.Field;
-import datab.annotation.ForeignKey;
-import datab.annotation.PrimaryKey;
-import datab.annotation.Table;
-import datab.exception.ConstructorNotFoundException;
-import datab.exception.FieldNotFoundException;
+import com.masich.datab.annotation.Field;
+import com.masich.datab.annotation.ForeignKey;
+import com.masich.datab.annotation.PrimaryKey;
+import com.masich.datab.annotation.Table;
+import com.masich.datab.exception.ConstructorNotFoundException;
+import com.masich.datab.exception.FieldNotFoundException;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Constructor;

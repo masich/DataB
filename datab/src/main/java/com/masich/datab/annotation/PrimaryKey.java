@@ -1,4 +1,4 @@
-package datab.annotation;
+package com.masich.datab.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,6 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PrimaryKey {
-    //PrimaryKey name in DB table
-    String value();
+    String value(); //PrimaryKey name in DB table
 }

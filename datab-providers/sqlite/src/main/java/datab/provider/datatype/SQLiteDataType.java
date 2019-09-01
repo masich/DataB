@@ -1,5 +1,7 @@
 package datab.provider.datatype;
 
+import com.masich.datab.provider.datatype.SQLFieldAttributes;
+
 public enum SQLiteDataType implements SQLFieldAttributes.DataType {
     INTEGER("INTEGER"),
     TEXT("TEXT"),

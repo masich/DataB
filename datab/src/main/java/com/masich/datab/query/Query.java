@@ -1,4 +1,4 @@
-package datab.query;
+package com.masich.datab.query;
 
 public abstract class Query {
     private String rawString;

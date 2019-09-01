@@ -1,6 +1,7 @@
 package datab.provider;
 
-import datab.query.SQLQuery;
+import com.masich.datab.provider.SQLQueryProvider;
+import com.masich.datab.query.SQLQuery;
 import datab.query.SQLiteQueryBuilder;
 
 public class SQLiteQueryProvider implements SQLQueryProvider {

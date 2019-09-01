@@ -1,4 +1,4 @@
-package datab.query;
+package com.masich.datab.query;
 
 public final class SQLQuery extends Query {
     public SQLQuery() {
@@ -95,7 +95,7 @@ public final class SQLQuery extends Query {
     }
 
     /**
-     * Class that represents parts of query like <code>(A, B, C)</code>
+     * Class that represents parts of the query like <code>(A, B, C)</code>
      */
     public static class Chain extends QueryPart {
         public Chain(String rawString) {
