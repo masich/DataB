@@ -1,5 +1,5 @@
 # DataB
-> Very simple and easy to use JDBC based ORM for Java and Kotlin.
+> Simple and easy to use JDBC based ORM for Java and Kotlin.
 
 DataB is a library for Java and Kotlin programing languages that 
 can help you to store application data in database. You will have an
@@ -42,7 +42,7 @@ TODO
 ## Getting started
 
 ### Initialization
-Before using databases and any DataB core functionality it is necessary to initialize it. The example of a method that initialize DataB is provided below.
+Before using databases and any DataB core functionality it is necessary to initialize it. The example of a method that initializes the DataB is provided below.
 ```java
 private static void initDB() throws SQLException {
     DBManager manager = new DBManager.Builder()
