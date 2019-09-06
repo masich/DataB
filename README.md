@@ -102,9 +102,35 @@ private String name;
 private String phoneNumber;
 ```
 
-So, now we have defined a simple [Person](datab-examples/src/main/java/com/masich/datab/examples/simple/models/Person.java) class with a set of payload. Lets
-use DataB functionality to communicate with a database and Person table.  
+So, now we have defined a simple [Person](datab-examples/src/main/java/com/masich/datab/examples/simple/models/Person.java) class with a set of payload. Lets use DataB functionality to communicate with a database and Person table.  
 
+### Using DataB features
+
+After determing our custom DataB Entity we can start using DataB core
+functionality. The first think that we need to do before we start is to invoke
+our ```initDB()``` method.
+
+```java
+initDB();
+```
+
+This method will setup and initialize core DataB instances and database tables.
+The SQLite database file ```sample.db``` will also be created after invoking 
+this method. Now. it is time to create some Person instances and to play with
+our database.
+
+```java
+String maxTel = "160-332", bobTel = "161-200";
+Person max = new Person("Max", maxTel);
+Person bob = new Person("Bob", bobTel);
+```
+We have Max and Bob as our Person class instances. And we can easily save 
+them into our database.
+
+```java
+max.save();
+bob.save();
+```
 
 ## License
 
