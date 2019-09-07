@@ -9,6 +9,20 @@ functionality.
 **Status**: in development.
 *Unstable, untested and has a meager functionality.*
 
+## Table of Contents  
+1. [Installation](#Installation)  
+    * [Modules](#Modules)
+    * [Maven](#Maven)
+        * [From sources](#From-sources)
+        * [From central Maven repository](#From-central-Maven-repository)
+    * [Gradle](#Gradle)
+2. [Getting started](#Getting-started)
+    * [Initialization](#Initialization)
+    * [Data models for DataB](#Data-models-for-DataB)
+    * [Using DataB features](#Using-DataB-features)
+3. [License](#License)
+
+
 ## Installation
 DataB is provided as a set of Maven repositories containing a lot of modules 
 to construct a unique environment for every user. A list of modules and their 
@@ -30,6 +44,7 @@ As was mentioned before, the DataB is a set of Maven repositories.
 So, you can install each of them using both Maven or Gradle.
 
 ### Maven
+
 #### From sources
 1. Download sources.
 2. Extract it from zip archive.
@@ -213,6 +228,8 @@ System.out.println(Person.getAll(Person.class));
 With a result such this:
 
 ```[Person{name='Max', phoneNumber='160-332'}, Person{name='Bob', phoneNumber='161-200'}, Person{name='Lara', phoneNumber='163-213'}, Person{name='Julia', phoneNumber='162-112'}]```
+
+The full source code of this example is presented [here](datab-examples/src/main/java/com/masich/datab/examples/simple).
 
 ## License
 
