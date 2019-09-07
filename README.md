@@ -95,10 +95,13 @@ define such fields as person's name and phone number. We can also say that every
 to define it as a primary key for our table.
 
 ```java
-@Field("name") //Name of the column in a database that will be related to this field
+//Name of the column in a database that will be related to this field
+@Field("name")
 private String name;
 
-@PrimaryKey("phone_number") //Unique primary key of the table. It can be almost anything but in this example we are using a phone number
+//Unique primary key of the table. It can be almost anything 
+//but in this example we are using a phone number
+@PrimaryKey("phone_number")
 private String phoneNumber;
 ```
 
@@ -125,12 +128,91 @@ Person max = new Person("Max", maxTel);
 Person bob = new Person("Bob", bobTel);
 ```
 We have Max and Bob as our Person class instances. And we can easily save 
-them into our database.
+them into our database using ```save()``` method:
 
 ```java
 max.save();
 bob.save();
 ```
+And now our database looks as follows:
+
+| № | name | phone_number (PK) |
+|---|------|-------------------|
+| 1 | Max  | 160-332           |
+| 2 | Bob  | 161-200           |
+
+We can get a particular person in our database by using ```Person.getById()```
+method. This method will return a person from database with appropriate
+id (Primary Key) or ```null```, if person with such id isn't in the
+database table.
+
+```java
+System.out.println(Person.getById(maxTel, Person.class));
+```
+
+This will print ```Person{name='Max', phoneNumber='160-332'}``` in the console.
+We also can use ```Person.getAll()``` method to get all rows in the Person database table. The result of this method is a ```List``` with all of the
+table rows.
+
+```java
+System.out.println(Person.getAll(Person.class));
+```
+
+And this operation will print such information as:
+
+```[Person{name='Max', phoneNumber='160-332'}, Person{name='Bob', phoneNumber='161-200'}]```
+
+Of course it is possible to remove row or rows from the database. To do it
+you can use either ```delete()``` for one row or ```Person.deleteAll(Person.class)```
+for all rows in the database table:
+
+```java
+bob.delete()
+System.out.println(Person.getById(maxTel, Person.class));
+System.out.println(Person.getAll(Person.class));
+
+Person.deleteAll(Person.class);
+System.out.println(Person.getAll(Person.class));
+```
+
+And the result will be as follows:
+
+```
+null
+[Person{name='Bob', phoneNumber='161-200'}]
+[]
+```
+
+You can also create ```Iterable``` instance and save it in a database table
+using ```Person.saveAll()```:
+
+```java
+List<Person> people = new ArrayList<>();
+people.add(max);
+people.add(bob);
+people.add(new Person("Lara", "163-213"));
+people.add(new Person("Julia", "162-112"));
+
+Person.saveAll(people);
+```
+
+And now our Person database table looks like:
+
+| № | name   | phone_number (PK) |
+|---|--------|-------------------|
+| 1 | Max    | 160-332           |
+| 2 | Bob    | 161-200           |
+| 3 | Lara   | 163-213           |
+| 4 | Julia  | 162-112           |
+
+And of course we can get all these rows:
+
+```java 
+System.out.println(Person.getAll(Person.class));
+```
+With a result such this:
+
+```[Person{name='Max', phoneNumber='160-332'}, Person{name='Bob', phoneNumber='161-200'}, Person{name='Lara', phoneNumber='163-213'}, Person{name='Julia', phoneNumber='162-112'}]```
 
 ## License
 
