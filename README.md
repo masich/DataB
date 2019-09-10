@@ -46,15 +46,15 @@ So, you can install each of them using both Maven or Gradle.
 ### Maven
 
 #### From sources
-1. Download sources.
-2. Extract it from zip archive.
-3. Go to parent source directory.
-4. Open a terminal/console here and execute next command:
+1. Download sources and extract them.
+2. Go to the parent source directory.
+3. Open a terminal/console here and execute next command:
 ```shell
 mvn clean install
 ```
-This command will compile and install DataB sources into your local Maven 
-repository and you will be able to use them in your projects. 
+
+This command will compile and install DataB modules into your local Maven 
+repository and you will be able to use them in your own projects. 
 
 #### From central Maven repository
 TODO
