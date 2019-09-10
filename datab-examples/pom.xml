@@ -5,13 +5,14 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>com.masich.datab</groupId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>datab-examples</artifactId>
-
     <packaging>pom</packaging>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -31,15 +32,15 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.masich.datab</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>provider-sqlite</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.masich.datab</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>converter-gson</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

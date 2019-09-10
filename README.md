@@ -6,6 +6,8 @@ can help you to store application data in database. You will have an
 ability to save almost all types of data into database using internal DataB 
 functionality.
 
+**The latest version** is 0.0.3-SNAPSHOT
+
 **Status**: in development.
 *Unstable, untested and has a meager functionality.*
 

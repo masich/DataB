@@ -3,10 +3,11 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>parent</artifactId>
         <groupId>com.masich.datab</groupId>
-        <version>0.0.2-SNAPSHOT</version>
+        <artifactId>parent</artifactId>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>datab</artifactId>
@@ -18,5 +19,4 @@
             <version>0.9.11</version>
         </dependency>
     </dependencies>
-
 </project>
