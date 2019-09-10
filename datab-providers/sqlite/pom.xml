@@ -3,20 +3,20 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>datab-providers</artifactId>
         <groupId>com.masich.datab</groupId>
+        <artifactId>datab-providers</artifactId>
         <version>0.0.2-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>provider-sqlite</artifactId>
-
 
     <dependencies>
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.21.0.1</version>
+            <version>3.28.0</version>
         </dependency>
     </dependencies>
 </project>
