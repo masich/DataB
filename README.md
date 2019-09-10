@@ -45,9 +45,7 @@ of the DataB [Converter](datab/src/main/java/com/masich/datab/converter/Converte
 As was mentioned before, the DataB is a set of Maven repositories. 
 So, you can install each of them using both Maven or Gradle.
 
-### Maven
-
-#### From sources
+#### Build and install sources
 1. Download sources and extract them.
 2. Go to the parent source directory.
 3. Open a terminal/console here and execute next command:
@@ -58,11 +56,56 @@ mvn clean install
 This command will compile and install DataB modules into your local Maven 
 repository and you will be able to use them in your own projects. 
 
-#### From central Maven repository
-TODO
+### Maven
+
+To use DataB in your Maven projects you should add appropriated DataB
+modules as dependencies. This example depends on such modules as ```datab``` main module, ```provider-sqlite``` and ```converter-gson```.
+
+```xml
+    <dependencies>
+        ...
+
+        <dependency>
+            <groupId>com.masich.datab</groupId>
+            <artifactId>datab</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.masich.datab</groupId>
+            <artifactId>provider-sqlite</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.masich.datab</groupId>
+            <artifactId>converter-gson</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+```
 
 #### Gradle
-TODO
+
+To use DataB in your Gradle project you also must indicate that you are
+using Maven local repository. It is only for now. In the near future this
+library will be added to the Maven Central Repository.
+
+```groovy
+
+repositories {
+    ...
+    
+    mavenLocal()
+}
+
+dependencies {
+    ...
+    
+    implementation("com.masich.datab:datab:0.0.3-SNAPSHOT")
+    implementation("com.masich.datab:provider-sqlite:0.0.3-SNAPSHOT")
+    implementation("com.masich.datab:converter-gson:0.0.3-SNAPSHOT")
+}
+
+```
 
 ## Getting started
 
