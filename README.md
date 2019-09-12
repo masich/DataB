@@ -14,9 +14,8 @@ functionality.
 ## Table of Contents  
 1. [Installation](#Installation)  
     * [Modules](#Modules)
+    * [Build and install from sources](#Build-and-install-from-sources)
     * [Maven](#Maven)
-        * [From sources](#From-sources)
-        * [From central Maven repository](#From-central-Maven-repository)
     * [Gradle](#Gradle)
 2. [Getting started](#Getting-started)
     * [Initialization](#Initialization)
@@ -45,7 +44,7 @@ of the DataB [Converter](datab/src/main/java/com/masich/datab/converter/Converte
 As was mentioned before, the DataB is a set of Maven repositories. 
 So, you can install each of them using both Maven or Gradle.
 
-#### Build and install sources
+### Build and install from sources
 1. Download sources and extract them.
 2. Go to the parent source directory.
 3. Open a terminal/console here and execute next command:
@@ -83,7 +82,7 @@ modules as dependencies. This example depends on such modules as ```datab``` mai
     </dependencies>
 ```
 
-#### Gradle
+### Gradle
 
 To use DataB in your Gradle project you also must indicate that you are
 using Maven local repository. It is only for now. In the near future this
