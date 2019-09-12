@@ -173,7 +173,6 @@ abstract public class Entity {
                     if (ReflectionUtils.isField(field)) {
                         Object fieldValue = ReflectionUtils.getFieldValue(field, obj);
                         valuesBuilder.appendUnit(DBManager.getSingleton()
-                                .getConverterFactory()
                                 .getConverter()
                                 .convertToString(fieldValue));
                     } else if (ReflectionUtils.isForeignKey(field)) {
@@ -216,7 +215,7 @@ abstract public class Entity {
                         delete(true, foreignKeyValue, deleted);
                     }
                 } else if (ReflectionUtils.isPrimaryKey(field)) {
-                    primaryKey = ReflectionUtils.getPrimaryKey(field);
+                    primaryKey = ReflectionUtils.getPrimaryKeyColumnName(field);
                     id = ReflectionUtils.getFieldValue(field, obj);
                 }
             }
@@ -239,7 +238,7 @@ abstract public class Entity {
             if (!isInitialized(id, entityClass, initialized)) {
                 String tableName = ReflectionUtils.getTableName(entityClass);
                 Field primaryKeyField = ReflectionUtils.getPrimaryKeyField(entityClass);
-                String primaryKey = ReflectionUtils.getPrimaryKey(primaryKeyField);
+                String primaryKey = ReflectionUtils.getPrimaryKeyColumnName(primaryKeyField);
                 SQLQuery.Builder queryBuilder = DBManager.getSingleton().getSQLQueryBuilder()
                         .select()
                         .all()
@@ -293,15 +292,14 @@ abstract public class Entity {
     private static <T> T initEntity(T entity, ResultSet entityResultSet, Map<Class, Map<Object, Object>> initialized) throws SQLException {
         Class<?> entityClass = entity.getClass();
         Converter converter = DBManager.getSingleton()
-                .getConverterFactory()
                 .getConverter();
         List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
         for (Field field : entityFields) {
             if (ReflectionUtils.isPrimaryKey(field)) {
                 ReflectionUtils.setFieldValue(field, entity,
-                        entityResultSet.getObject(ReflectionUtils.getPrimaryKey(field)));
+                        entityResultSet.getObject(ReflectionUtils.getPrimaryKeyColumnName(field)));
             } else if (ReflectionUtils.isField(field)) {
-                String fieldName = ReflectionUtils.getFieldName(field);
+                String fieldName = ReflectionUtils.getFieldColumnName(field);
                 Type fieldType = ReflectionUtils.getFieldType(field);
                 Object result = entityResultSet.getObject(fieldName);
                 if (result instanceof String) {
@@ -309,7 +307,7 @@ abstract public class Entity {
                 }
                 ReflectionUtils.setFieldValue(field, entity, result);
             } else if (ReflectionUtils.isForeignKey(field)) {
-                Object foreignKeyId = entityResultSet.getObject(ReflectionUtils.getForeignKey(field));
+                Object foreignKeyId = entityResultSet.getObject(ReflectionUtils.getForeignKeyColumnName(field));
                 Class<?> foreignKeyClass = ReflectionUtils.getFieldClass(field);
                 Object foreignKeyObject = getById(foreignKeyId, foreignKeyClass, initialized);
                 ReflectionUtils.setFieldValue(field, entity, foreignKeyObject);

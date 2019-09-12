@@ -3,14 +3,17 @@ package com.masich.datab;
 import com.masich.datab.converter.Converter;
 import com.masich.datab.provider.DBProvider;
 import com.masich.datab.provider.SQLQueryProvider;
+import com.masich.datab.provider.attributes.TableAttributes;
 import com.masich.datab.query.SQLQuery;
 import com.masich.datab.utils.ReflectionUtils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
 
-public class DBManager implements SQLQueryProvider {
+public class DBManager implements SQLQueryProvider, DBProvider.Factory, Converter.Factory {
     private static DBManager managerInstance;
     private String databaseSrc;
     private String entityPackageName = "";
@@ -41,13 +44,15 @@ public class DBManager implements SQLQueryProvider {
     }
 
     public void initDB() throws SQLException {
-        providerFactory.getDBProvider().initDB(getConnection(),
-                ReflectionUtils.getAllSubclassesByPackage(entityPackageName, Entity.class));
+        Set<Class<? extends Entity>> entityClasses = ReflectionUtils.getAllSubclassesByPackage(entityPackageName, Entity.class);
+        List<TableAttributes> tableAttributesList = TableAttributes.fromEntityClasses(entityClasses);
+        providerFactory.getDBProvider().initDB(getConnection(), tableAttributesList);
     }
 
     public void dropDB() throws SQLException {
-        providerFactory.getDBProvider().dropDB(getConnection(),
-                ReflectionUtils.getAllSubclassesByPackage(entityPackageName, Entity.class));
+        Set<Class<? extends Entity>> entityClasses = ReflectionUtils.getAllSubclassesByPackage(entityPackageName, Entity.class);
+        List<TableAttributes> tableAttributesList = TableAttributes.fromEntityClasses(entityClasses);
+        providerFactory.getDBProvider().dropDB(getConnection(), tableAttributesList);
     }
 
     public Connection getConnection() throws SQLException {
@@ -72,16 +77,12 @@ public class DBManager implements SQLQueryProvider {
         this.entityPackageName = entityPackageName;
     }
 
-    public Converter.Factory getConverterFactory() {
-        return converterFactory;
+    public Converter getConverter() {
+        return converterFactory.getConverter();
     }
 
     public void setConverterFactory(Converter.Factory converterFactory) {
         this.converterFactory = converterFactory;
-    }
-
-    public DBProvider.Factory getProviderFactory() {
-        return providerFactory;
     }
 
     public void setProviderFactory(DBProvider.Factory providerFactory) {
@@ -107,21 +108,26 @@ public class DBManager implements SQLQueryProvider {
 
     @Override
     public SQLQuery.Builder getSQLQueryBuilder() {
-        return getProviderFactory().getDBProvider().getSQLQueryProvider().getSQLQueryBuilder();
+        return getDBProvider().getSQLQueryProvider().getSQLQueryBuilder();
     }
 
     @Override
     public SQLQuery.Chain.Builder getSQLQueryChainBuilder() {
-        return getProviderFactory().getDBProvider().getSQLQueryProvider().getSQLQueryChainBuilder();
+        return getDBProvider().getSQLQueryProvider().getSQLQueryChainBuilder();
     }
 
     @Override
     public SQLQuery.Condition.Builder getSQLQueryConditionBuilder() {
-        return getProviderFactory().getDBProvider().getSQLQueryProvider().getSQLQueryConditionBuilder();
+        return getDBProvider().getSQLQueryProvider().getSQLQueryConditionBuilder();
     }
 
     private Connection getNewConnection(String dbSrc, String login, String password) throws SQLException {
         return DriverManager.getConnection(dbSrc, login, password);
+    }
+
+    @Override
+    public DBProvider getDBProvider() {
+        return providerFactory.getDBProvider();
     }
 
     public static class Builder {
@@ -152,7 +158,7 @@ public class DBManager implements SQLQueryProvider {
         }
 
         public DBManager build() throws SQLException {
-            if(dbManager.providerFactory == null) {
+            if (dbManager.providerFactory == null) {
                 throw new NullPointerException("ProviderFactory cannot be null. Please, provide it by using addProviderFactory() method");
             }
             String dbPrefix = dbManager.providerFactory.getDBProvider().getDBStringPrefix();

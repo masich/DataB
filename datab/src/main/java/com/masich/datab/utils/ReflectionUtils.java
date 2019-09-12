@@ -54,7 +54,7 @@ public class ReflectionUtils {
         }
     }
 
-    public static String getPrimaryKey(final java.lang.reflect.Field primaryKeyField) {
+    public static String getPrimaryKeyColumnName(final java.lang.reflect.Field primaryKeyField) {
         return primaryKeyField.getAnnotation(PrimaryKey.class).value();
     }
 
@@ -64,11 +64,11 @@ public class ReflectionUtils {
         return getFieldValue(primaryKeyField, obj);
     }
 
-    public static String getFieldName(final java.lang.reflect.Field field) {
+    public static String getFieldColumnName(final java.lang.reflect.Field field) {
         return field.getAnnotation(Field.class).value();
     }
 
-    public static String getForeignKey(final java.lang.reflect.Field foreignKeyField) {
+    public static String getForeignKeyColumnName(final java.lang.reflect.Field foreignKeyField) {
         return foreignKeyField.getAnnotation(ForeignKey.class).value();
     }
 

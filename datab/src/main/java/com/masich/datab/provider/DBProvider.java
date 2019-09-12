@@ -1,6 +1,7 @@
 package com.masich.datab.provider;
 
-import com.masich.datab.Entity;
+import com.masich.datab.provider.datatype.DataType;
+import com.masich.datab.provider.attributes.TableAttributes;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,20 +18,20 @@ public interface DBProvider {
      * The implementation of this method should include an initialization of all of the database tables specified by
      * <code>entityClasses</code> data structure.
      *
-     * @param dbConnection  JDBC database connection instance
-     * @param entityClasses A data structure that contains Entities to initialize in the database instance
+     * @param dbConnection     JDBC database connection instance
+     * @param tablesAttributes A data structure that contains Entity table attributes to initialize in the database instance
      * @throws SQLException An exception that could occur during database initialization
      */
-    void initDB(Connection dbConnection, Iterable<Class<? extends Entity>> entityClasses) throws SQLException;
+    void initDB(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException;
 
     /**
      * Method that drops particular tables in the database.
      *
-     * @param dbConnection  JDBC database connection instance
-     * @param entityClasses A data structure that contains Entities to drop in the database instance
+     * @param dbConnection     JDBC database connection instance
+     * @param tablesAttributes A data structure that contains Entity table attributes to drop in the database instance
      * @throws SQLException An exception that could occur during database drop
      */
-    void dropDB(Connection dbConnection, Iterable<Class<? extends Entity>> entityClasses) throws SQLException;
+    void dropDB(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException;
 
     /**
      * @param dbSrc A database source path
@@ -52,6 +53,11 @@ public interface DBProvider {
      * @return A provider that will be used to construct the SQL queries
      */
     SQLQueryProvider getSQLQueryProvider();
+
+    /**
+     * @return A DataType.Converter instance
+     */
+    DataType.Converter getDataTypeConverter();
 
     interface Factory {
         DBProvider getDBProvider();

@@ -1,21 +1,30 @@
 package com.masich.datab.provider.datatype;
 
-import com.masich.datab.provider.datatype.SQLFieldAttributes;
+public enum SQLiteDataType implements DataType {
+    INTEGER(InternalDataTypes.INTEGER | InternalDataTypes.BIGINT | InternalDataTypes.DOUBLE | InternalDataTypes.SMALLINT | InternalDataTypes.TINYINT | InternalDataTypes.BIT),
+    TEXT(InternalDataTypes.ALL_TYPES),
+    REAL(InternalDataTypes.DOUBLE | InternalDataTypes.FLOAT | InternalDataTypes.REAL),
+    NULL(InternalDataTypes.NULL),
+    BLOB(InternalDataTypes.BLOB | InternalDataTypes.VARBINARY | InternalDataTypes.LONGVARBINARY);
 
-public enum SQLiteDataType implements SQLFieldAttributes.DataType {
-    INTEGER("INTEGER"),
-    TEXT("TEXT"),
-    REAL("REAL"),
-    NULL("NULL"),
-    BLOB("BLOB");
+    private final int internalDataType;
 
-    private String name;
-
-    SQLiteDataType(String dataTypeName) {
-        this.name = dataTypeName;
+    SQLiteDataType(int internalDataType) {
+        this.internalDataType = internalDataType;
     }
 
+    @Override
     public String getSQLName() {
-        return name;
+        return name();
+    }
+
+    @Override
+    public int getInternalDataType() {
+        return internalDataType;
+    }
+
+    @Override
+    public boolean hasInternalDataType(int dataType) {
+        return (internalDataType & dataType) != 0;
     }
 }
