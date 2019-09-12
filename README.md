@@ -6,7 +6,7 @@ can help you to store application data in database. You will have an
 ability to save almost all types of data into database using internal DataB 
 functionality.
 
-**The latest version** is 0.0.3-SNAPSHOT
+**The latest version** is 0.0.4-SNAPSHOT
 
 **Status**: in development.
 *Unstable, untested and has a meager functionality.*
@@ -68,17 +68,17 @@ modules as dependencies. This example depends on such modules as ```datab``` mai
         <dependency>
             <groupId>com.masich.datab</groupId>
             <artifactId>datab</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.masich.datab</groupId>
             <artifactId>provider-sqlite</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.masich.datab</groupId>
             <artifactId>converter-gson</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
     </dependencies>
 ```
@@ -100,9 +100,9 @@ repositories {
 dependencies {
     ...
     
-    implementation("com.masich.datab:datab:0.0.3-SNAPSHOT")
-    implementation("com.masich.datab:provider-sqlite:0.0.3-SNAPSHOT")
-    implementation("com.masich.datab:converter-gson:0.0.3-SNAPSHOT")
+    implementation("com.masich.datab:datab:0.0.4-SNAPSHOT")
+    implementation("com.masich.datab:provider-sqlite:0.0.4-SNAPSHOT")
+    implementation("com.masich.datab:converter-gson:0.0.4-SNAPSHOT")
 }
 
 ```
