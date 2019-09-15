@@ -1,6 +1,6 @@
 package com.masich.datab.provider.datatype;
 
-public class InternalDataTypes {
+public final class InternalDataTypes {
 
     /**
      * <P>The constant in the Java programming language, sometimes referred

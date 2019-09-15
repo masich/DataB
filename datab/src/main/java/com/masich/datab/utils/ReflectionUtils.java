@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 
-public class ReflectionUtils {
+public final class ReflectionUtils {
     public static java.lang.reflect.Field getPrimaryKeyField(final Class<?> entityClass) throws FieldNotFoundException {
         List<java.lang.reflect.Field> fields = getAllFields(new ArrayList<java.lang.reflect.Field>(), entityClass);
 
@@ -125,5 +125,8 @@ public class ReflectionUtils {
         }
 
         return fields;
+    }
+
+    private ReflectionUtils() {
     }
 }
