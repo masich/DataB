@@ -1,6 +1,6 @@
 package com.masich.datab.examples.simple;
 
-import com.masich.datab.DBManager;
+import com.masich.datab.DatabaseManager;
 import com.masich.datab.converter.gson.GsonConverterFactory;
 import com.masich.datab.examples.simple.models.Person;
 import com.masich.datab.provider.SQLiteProviderFactory;
@@ -53,7 +53,7 @@ public class Main {
     }
 
     private static void initDB() throws SQLException {
-        DBManager manager = new DBManager.Builder()
+        DatabaseManager manager = new DatabaseManager.Builder()
                 //Provider for your type of database
                 .addProviderFactory(new SQLiteProviderFactory())
                 //Path to your database. You also can use a full path like "jdbc:sqlite:sample.db"
@@ -62,6 +62,6 @@ public class Main {
                 .addConverterFactory(new GsonConverterFactory())
                 .build();
 
-        DBManager.setSingleton(manager);
+        DatabaseManager.setSingleton(manager);
     }
 }

@@ -13,34 +13,34 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-public final class DBManager implements SQLQueryProvider, DBProvider.Factory, Converter.Factory {
-    private static DBManager managerInstance;
+public final class DatabaseManager implements SQLQueryProvider, DBProvider.Factory, Converter.Factory {
+    private static DatabaseManager managerInstance;
     private String databaseSrc;
     private String entityPackageName = "";
     private Connection dbConnection;
     private Converter.Factory converterFactory;
     private DBProvider.Factory providerFactory;
 
-    private DBManager() {
+    private DatabaseManager() {
     }
 
-    public DBManager(String databaseSrc) throws SQLException {
+    public DatabaseManager(String databaseSrc) throws SQLException {
         this("", databaseSrc);
     }
 
-    public DBManager(String entityPackageName, String databaseSrc) throws SQLException {
+    public DatabaseManager(String entityPackageName, String databaseSrc) throws SQLException {
         this.databaseSrc = databaseSrc;
         this.dbConnection = getNewConnection(databaseSrc);
         this.entityPackageName = entityPackageName;
         initDB();
     }
 
-    public static DBManager getSingleton() {
+    public static DatabaseManager getSingleton() {
         return managerInstance;
     }
 
-    public static void setSingleton(DBManager dbManager) {
-        managerInstance = dbManager;
+    public static void setSingleton(DatabaseManager databaseManager) {
+        managerInstance = databaseManager;
     }
 
     public void initDB() throws SQLException {
@@ -131,42 +131,42 @@ public final class DBManager implements SQLQueryProvider, DBProvider.Factory, Co
     }
 
     public static class Builder {
-        private DBManager dbManager;
+        private DatabaseManager databaseManager;
 
         public Builder() {
-            this.dbManager = new DBManager();
+            this.databaseManager = new DatabaseManager();
         }
 
         public Builder addDatabaseSrc(String dbSrc) {
-            this.dbManager.setDatabaseSrc(dbSrc);
+            this.databaseManager.setDatabaseSrc(dbSrc);
             return this;
         }
 
         public Builder addPackage(String entityPackageName) {
-            this.dbManager.setEntityPackageName(entityPackageName);
+            this.databaseManager.setEntityPackageName(entityPackageName);
             return this;
         }
 
         public Builder addConverterFactory(Converter.Factory converterFactory) {
-            this.dbManager.setConverterFactory(converterFactory);
+            this.databaseManager.setConverterFactory(converterFactory);
             return this;
         }
 
         public Builder addProviderFactory(DBProvider.Factory providerFactory) {
-            this.dbManager.setProviderFactory(providerFactory);
+            this.databaseManager.setProviderFactory(providerFactory);
             return this;
         }
 
-        public DBManager build() throws SQLException {
-            if (dbManager.providerFactory == null) {
+        public DatabaseManager build() throws SQLException {
+            if (databaseManager.providerFactory == null) {
                 throw new NullPointerException("ProviderFactory cannot be null. Please, provide it by using addProviderFactory() method");
             }
-            String dbPrefix = dbManager.providerFactory.getDBProvider().getDBStringPrefix();
-            if (!dbManager.databaseSrc.startsWith(dbPrefix)) {
-                dbManager.databaseSrc = dbPrefix + dbManager.databaseSrc;
+            String dbPrefix = databaseManager.providerFactory.getDBProvider().getDBStringPrefix();
+            if (!databaseManager.databaseSrc.startsWith(dbPrefix)) {
+                databaseManager.databaseSrc = dbPrefix + databaseManager.databaseSrc;
             }
-            dbManager.initDB();
-            return dbManager;
+            databaseManager.initDB();
+            return databaseManager;
         }
     }
 }

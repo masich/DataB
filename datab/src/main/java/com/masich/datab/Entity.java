@@ -25,10 +25,10 @@ abstract public class Entity {
     //Todo: add exception logging
     public static void save(boolean saveRecursively, final Entity entity) {
         try {
-            DBManager dbManager = DBManager.getSingleton();
-            dbManager.beginTransaction();
+            DatabaseManager databaseManager = DatabaseManager.getSingleton();
+            databaseManager.beginTransaction();
             save(saveRecursively, entity, new HashSet<Entity>());
-            dbManager.finishTransaction();
+            databaseManager.finishTransaction();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (FieldNotFoundException e) {
@@ -60,10 +60,10 @@ abstract public class Entity {
      */
     public static void saveAll(boolean saveRecursively, final Iterable<? extends Entity> entities) {
         try {
-            DBManager dbManager = DBManager.getSingleton();
-            dbManager.beginTransaction();
+            DatabaseManager databaseManager = DatabaseManager.getSingleton();
+            databaseManager.beginTransaction();
             saveAll(saveRecursively, entities, new HashSet<Entity>());
-            dbManager.finishTransaction();
+            databaseManager.finishTransaction();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (FieldNotFoundException e) {
@@ -83,10 +83,10 @@ abstract public class Entity {
     //Todo: add exception logging
     public static void delete(boolean deleteRecursively, final Entity obj) {
         try {
-            DBManager dbManager = DBManager.getSingleton();
-            dbManager.beginTransaction();
+            DatabaseManager databaseManager = DatabaseManager.getSingleton();
+            databaseManager.beginTransaction();
             delete(deleteRecursively, obj, new HashSet<Entity>());
-            dbManager.finishTransaction();
+            databaseManager.finishTransaction();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (FieldNotFoundException e) {
@@ -101,7 +101,7 @@ abstract public class Entity {
      */
     public static boolean deleteAll(final Class<? extends Entity> entityClass) {
         try {
-            Query query = DBManager.getSingleton().getSQLQueryBuilder()
+            Query query = DatabaseManager.getSingleton().getSQLQueryBuilder()
                     .delete()
                     .from(ReflectionUtils.getTableName(entityClass))
                     .build();
@@ -139,7 +139,7 @@ abstract public class Entity {
     public static <T> List<T> getAll(final Class<T> entityClass) {
         try {
             String tableName = ReflectionUtils.getTableName(entityClass);
-            Query query = DBManager.getSingleton().getSQLQueryBuilder().select().all().from(tableName).build();
+            Query query = DatabaseManager.getSingleton().getSQLQueryBuilder().select().all().from(tableName).build();
             ResultSet entityResultSet = executeQuery(query);
             List<T> allEntities = new ArrayList<>();
             while (entityResultSet.next()) {
@@ -163,16 +163,16 @@ abstract public class Entity {
                 saved.add(obj);
                 String tableName = ReflectionUtils.getTableName(entityClass);
                 List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
-                SQLQuery.Builder queryBuilder = DBManager.getSingleton().getSQLQueryBuilder()
+                SQLQuery.Builder queryBuilder = DatabaseManager.getSingleton().getSQLQueryBuilder()
                         .replace()
                         .into()
                         .appendQuery(tableName)
                         .values();
-                SQLQuery.Chain.Builder valuesBuilder = DBManager.getSingleton().getSQLQueryChainBuilder();
+                SQLQuery.Chain.Builder valuesBuilder = DatabaseManager.getSingleton().getSQLQueryChainBuilder();
                 for (Field field : entityFields) {
                     if (ReflectionUtils.isField(field)) {
                         Object fieldValue = ReflectionUtils.getFieldValue(field, obj);
-                        valuesBuilder.appendUnit(DBManager.getSingleton()
+                        valuesBuilder.appendUnit(DatabaseManager.getSingleton()
                                 .getConverter()
                                 .convertToString(fieldValue));
                     } else if (ReflectionUtils.isForeignKey(field)) {
@@ -221,11 +221,11 @@ abstract public class Entity {
             }
             if (primaryKey == null)
                 throw new FieldNotFoundException("Class " + entityClass.getName() + " has no primary key!");
-            SQLQuery.Builder queryBuilder = DBManager.getSingleton().getSQLQueryBuilder()
+            SQLQuery.Builder queryBuilder = DatabaseManager.getSingleton().getSQLQueryBuilder()
                     .delete()
                     .from(tableName)
                     .where();
-            SQLQuery.Condition condition = DBManager.getSingleton().getSQLQueryConditionBuilder()
+            SQLQuery.Condition condition = DatabaseManager.getSingleton().getSQLQueryConditionBuilder()
                     .equals(primaryKey, id)
                     .build();
             query = queryBuilder.appendQueryPart(condition).build();
@@ -239,12 +239,12 @@ abstract public class Entity {
                 String tableName = ReflectionUtils.getTableName(entityClass);
                 Field primaryKeyField = ReflectionUtils.getPrimaryKeyField(entityClass);
                 String primaryKey = ReflectionUtils.getPrimaryKeyColumnName(primaryKeyField);
-                SQLQuery.Builder queryBuilder = DBManager.getSingleton().getSQLQueryBuilder()
+                SQLQuery.Builder queryBuilder = DatabaseManager.getSingleton().getSQLQueryBuilder()
                         .select()
                         .all()
                         .from(tableName)
                         .where();
-                SQLQuery.Condition condition = DBManager.getSingleton().getSQLQueryConditionBuilder()
+                SQLQuery.Condition condition = DatabaseManager.getSingleton().getSQLQueryConditionBuilder()
                         .equals(primaryKey, id)
                         .build();
                 Query query = queryBuilder.appendQueryPart(condition).build();
@@ -291,7 +291,7 @@ abstract public class Entity {
 
     private static <T> T initEntity(T entity, ResultSet entityResultSet, Map<Class, Map<Object, Object>> initialized) throws SQLException {
         Class<?> entityClass = entity.getClass();
-        Converter converter = DBManager.getSingleton()
+        Converter converter = DatabaseManager.getSingleton()
                 .getConverter();
         List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
         for (Field field : entityFields) {
@@ -317,7 +317,7 @@ abstract public class Entity {
     }
 
     public static ResultSet executeQuery(String query) throws SQLException {
-        return DBManager.getSingleton().getConnection().createStatement().executeQuery(query);
+        return DatabaseManager.getSingleton().getConnection().createStatement().executeQuery(query);
     }
 
     public static ResultSet executeQuery(Query query) throws SQLException {
@@ -325,7 +325,7 @@ abstract public class Entity {
     }
 
     public static Integer executeUpdate(String query) throws SQLException {
-        return DBManager.getSingleton().getConnection().createStatement().executeUpdate(query);
+        return DatabaseManager.getSingleton().getConnection().createStatement().executeUpdate(query);
     }
 
     public static Integer executeUpdate(Query query) throws SQLException {
