@@ -6,7 +6,11 @@ can help you to store application data in database. You will have an
 ability to save almost all types of data into database using internal DataB 
 functionality.
 
-**The latest version** is 0.0.4-SNAPSHOT
+**The latest version** is <ins>0.0.4-SNAPSHOT</ins>
+
+***Planned next version changes:***
+1. Redesign DataB internal types and their converting mechanism.
+2. Fix SQL injection problems. Redesign query build approach.
 
 **Status**: in development.
 *Unstable, untested and has a meager functionality.*
