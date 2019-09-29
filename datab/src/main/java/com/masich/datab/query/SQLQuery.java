@@ -1,95 +1,112 @@
 package com.masich.datab.query;
 
-public final class SQLQuery extends Query {
-    public SQLQuery() {
-        this("");
+import java.util.ArrayList;
+import java.util.List;
+
+public final class SQLQuery implements Query {
+    private String rawQuery;
+    private List<Object> queryParams;
+
+    public static final SQLQuery EMPTY_QUERY = new SQLQuery("", new ArrayList<Object>());
+
+    public SQLQuery(String rawQuery, List<Object> queryParams) {
+        this.rawQuery = rawQuery;
+        this.queryParams = queryParams;
     }
 
-    public SQLQuery(String rawString) {
-        super(rawString);
+    @Override
+    public String getRawQuery() {
+        return rawQuery;
     }
 
-    private static String toSQLValue(Object object) {
-        String quotes = object == null ? "" : "\'";
-        return quotes + object + quotes;
+    @Override
+    public List<Object> getQueryParams() {
+        return queryParams;
     }
 
     public static class Builder extends Query.Builder<SQLQuery> {
+        private StringBuffer rawQuery;
+        private List<Object> queryParams;
 
         public Builder() {
-            super();
-        }
-
-        public Builder(String initialQuery) {
-            super(initialQuery);
+            rawQuery = new StringBuffer();
+            queryParams = new ArrayList<>();
         }
 
         public SQLQuery build() {
-            return new SQLQuery(rawQuery.toString());
+            return new SQLQuery(rawQuery.toString(), queryParams);
         }
 
         public Builder create() {
-            return appendQuery("CREATE");
+            return appendRawQuery("CREATE");
         }
 
         public Builder select() {
-            return appendQuery("SELECT");
+            return appendRawQuery("SELECT");
         }
 
         public Builder insert() {
-            return appendQuery("INSERT");
+            return appendRawQuery("INSERT");
         }
 
         public Builder replace() {
-            return appendQuery("REPLACE");
+            return appendRawQuery("REPLACE");
         }
 
         public Builder update() {
-            return appendQuery("UPDATE");
+            return appendRawQuery("UPDATE");
         }
 
         public Builder delete() {
-            return appendQuery("DELETE");
+            return appendRawQuery("DELETE");
         }
 
         public Builder all() {
-            return appendQuery("*");
+            return appendRawQuery("*");
         }
 
-        public Builder from() {
-            return appendQuery("FROM");
+        private Builder from() {
+            return appendRawQuery("FROM");
         }
 
-        public Builder from(Object fromValue) {
-            return appendQuery("FROM").appendQuery(fromValue);
+        public Builder from(String fromValue) {
+            return from().appendRawQuery(fromValue);
         }
 
-        public Builder into() {
-            return appendQuery("INTO");
+        private Builder into() {
+            return appendRawQuery("INTO");
         }
 
-        public Builder into(Object intoValue) {
-            return appendQuery("FROM").appendQuery(intoValue);
+        public Builder into(String intoValue) {
+            return into().appendRawQuery(intoValue);
         }
 
         public Builder set() {
-            return appendQuery("SET");
+            return appendRawQuery("SET");
         }
 
         public Builder where() {
-            return appendQuery("WHERE");
+            return appendRawQuery("WHERE");
         }
 
         public Builder values() {
-            return appendQuery("VALUES");
+            return appendRawQuery("VALUES");
         }
 
-        public Builder appendQueryPart(QueryPart queryPart) {
-            return appendQuery(queryPart.toRawString());
+        public Builder appendQueryPart(Query queryPart) {
+            appendRawQuery(queryPart.getRawQuery());
+            queryParams.addAll(queryPart.getQueryParams());
+            return this;
         }
 
-        public Builder appendQuery(Object rawQuery) {
+        public Builder appendRawQuery(Object rawQuery) {
             this.rawQuery.append(rawQuery).append(' ');
+            return this;
+        }
+
+        public Builder appendParams(Object param) {
+            appendRawQuery('?');
+            queryParams.add(param);
             return this;
         }
     }
@@ -97,31 +114,49 @@ public final class SQLQuery extends Query {
     /**
      * Class that represents parts of the query like <code>(A, B, C)</code>
      */
-    public static class Chain extends QueryPart {
-        public Chain(String rawString) {
-            super(rawString);
+    public static class Chain implements Query {
+        private String rawQuery;
+        private List<Object> queryParams;
+
+        public Chain(String rawQuery, List<Object> queryParams) {
+            this.rawQuery = rawQuery;
+            this.queryParams = queryParams;
         }
 
-        public static class Builder extends QueryPart.Builder<Chain> {
-            private static String DIVIDER = ", ";
+        @Override
+        public String getRawQuery() {
+            return rawQuery;
+        }
+
+        @Override
+        public List<Object> getQueryParams() {
+            return queryParams;
+        }
+
+        public static class Builder extends Query.Builder<Chain> {
+            private static String SEPARATOR = ", ";
             private boolean isValues;
 
             public Builder(boolean isSQLValues) {
-                super("(");
-                this.isValues = isSQLValues;
+                rawQuery = new StringBuffer();
+                queryParams = new ArrayList<>();
+                rawQuery.append('(');
+                isValues = isSQLValues;
             }
 
             public Builder() {
                 this(true);
             }
 
-            public Builder(String initialPart) {
-                this();
-                rawQuery.append(initialPart);
-            }
-
+            // FIXME: 29.09.19 Remove isValues
             public Builder appendUnit(Object rawUnit) {
-                this.rawQuery.append(DIVIDER).append(isValues ? toSQLValue(rawUnit) : rawUnit);
+                rawQuery.append(SEPARATOR);
+                if (isValues) {
+                    rawQuery.append('?');
+                    queryParams.add(rawUnit);
+                } else {
+                    rawQuery.append(rawUnit);
+                }
                 return this;
             }
 
@@ -133,18 +168,31 @@ public final class SQLQuery extends Query {
             @Override
             public Chain build() {
                 rawQuery.append(')');
-                return new Chain(rawQuery.toString().replaceFirst(DIVIDER, ""));
+                return new Chain(rawQuery.toString().replaceFirst(SEPARATOR, ""), queryParams);
             }
         }
     }
 
-    public static class Condition extends QueryPart {
-        public Condition(String rawString) {
-            super(rawString);
+    public static class Condition implements Query {
+        private String rawQuery;
+        private List<Object> queryParams;
+
+        public Condition(String rawQuery, List<Object> queryParams) {
+            this.rawQuery = rawQuery;
+            this.queryParams = queryParams;
         }
 
-        public static class Builder extends QueryPart.Builder<Condition> {
+        @Override
+        public String getRawQuery() {
+            return rawQuery;
+        }
 
+        @Override
+        public List<Object> getQueryParams() {
+            return queryParams;
+        }
+
+        public static class Builder extends Query.Builder<Condition> {
             public Builder equals(Object column, Object b) {
                 return appendCondition(column, '=', b);
             }
@@ -154,29 +202,41 @@ public final class SQLQuery extends Query {
             }
 
             public Builder and() {
-                return appendQuery("AND");
+                return appendRawQuery("AND");
             }
 
-            public Builder appenCondition(Condition condition) {
-                return appendQuery('(').appendQuery(condition.toRawString()).appendQuery(')');
+            public Builder appendCondition(Condition condition) {
+                return appendRawQuery('(').appendQueryPart(condition).appendRawQuery(')');
+            }
+
+            public Builder appendQueryPart(Query queryPart) {
+                appendRawQuery(queryPart.getRawQuery());
+                queryParams.addAll(queryPart.getQueryParams());
+                return this;
             }
 
             public Builder or() {
-                return appendQuery("AND");
+                return appendRawQuery("OR");
             }
 
             private Builder appendCondition(Object a, Object operator, Object b) {
-                return appendQuery(a).appendQuery(operator).appendQuery(toSQLValue(b));
+                return appendRawQuery(a).appendRawQuery(operator).appendParams(b);
             }
 
-            private Builder appendQuery(Object a) {
+            private Builder appendRawQuery(Object a) {
                 this.rawQuery.append(a).append(' ');
+                return this;
+            }
+
+            public Builder appendParams(Object param) {
+                appendRawQuery('?');
+                queryParams.add(param);
                 return this;
             }
 
             @Override
             public Condition build() {
-                return new Condition(rawQuery.toString());
+                return new Condition(rawQuery.toString(), queryParams);
             }
         }
     }

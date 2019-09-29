@@ -2,8 +2,10 @@ package com.masich.datab.provider;
 
 import com.masich.datab.provider.datatype.DataType;
 import com.masich.datab.provider.attributes.TableAttributes;
+import com.masich.datab.query.Query;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public interface DatabaseProvider {
@@ -58,6 +60,18 @@ public interface DatabaseProvider {
      * @return A DataType.Converter instance
      */
     DataType.Converter getDataTypeConverter();
+
+    // TODO: 29.09.19 Write documentation
+    ResultSet executeQuery(Connection connection, Query query) throws SQLException;
+
+    // TODO: 29.09.19 Write documentation
+    Integer executeUpdateUnsafe(Connection connection, String query) throws SQLException;
+
+    // TODO: 29.09.19 Write documentation
+    Integer executeUpdate(Connection connection, Query query) throws SQLException;
+
+    // TODO: 29.09.19 Write documentation
+    ResultSet executeQueryUnsafe(Connection connection, String query) throws SQLException;
 
     interface Factory {
         DatabaseProvider getDatabaseProvider();

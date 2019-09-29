@@ -9,6 +9,8 @@ import com.masich.datab.query.SQLQuery;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -106,7 +108,7 @@ public final class DatabaseUtils {
                     .delete()
                     .from(ReflectionUtils.getTableName(entityClass))
                     .build();
-            return executeUpdate(query) > 0;
+            return DatabaseManager.getSingleton().executeUpdate(query) > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -141,7 +143,7 @@ public final class DatabaseUtils {
         try {
             String tableName = ReflectionUtils.getTableName(entityClass);
             Query query = DatabaseManager.getSingleton().getSQLQueryBuilder().select().all().from(tableName).build();
-            ResultSet entityResultSet = executeQuery(query);
+            ResultSet entityResultSet = DatabaseManager.getSingleton().executeQuery(query);
             List<T> allEntities = new ArrayList<>();
             while (entityResultSet.next()) {
                 T entity = ReflectionUtils.getNewInstance(entityClass);
@@ -166,8 +168,7 @@ public final class DatabaseUtils {
                 List<Field> entityFields = ReflectionUtils.getAllFields(entityClass);
                 SQLQuery.Builder queryBuilder = DatabaseManager.getSingleton().getSQLQueryBuilder()
                         .replace()
-                        .into()
-                        .appendQuery(tableName)
+                        .into(tableName)
                         .values();
                 SQLQuery.Chain.Builder valuesBuilder = DatabaseManager.getSingleton().getSQLQueryChainBuilder();
                 for (Field field : entityFields) {
@@ -187,9 +188,9 @@ public final class DatabaseUtils {
                 query = queryBuilder.appendQueryPart(valuesBuilder.build()).build();
             } else {
                 //Todo: Serialize another objects
-                query = new SQLQuery("");
+                query = SQLQuery.EMPTY_QUERY;
             }
-            executeUpdate(query);
+            DatabaseManager.getSingleton().executeUpdate(query);
         }
     }
 
@@ -230,7 +231,7 @@ public final class DatabaseUtils {
                     .equals(primaryKey, id)
                     .build();
             query = queryBuilder.appendQueryPart(condition).build();
-            executeUpdate(query);
+            DatabaseManager.getSingleton().executeUpdate(query);
         }
     }
 
@@ -249,7 +250,7 @@ public final class DatabaseUtils {
                         .equals(primaryKey, id)
                         .build();
                 Query query = queryBuilder.appendQueryPart(condition).build();
-                ResultSet entityResultSet = executeQuery(query);
+                ResultSet entityResultSet = DatabaseManager.getSingleton().executeQuery(query);
                 if (!entityResultSet.next()) return null;
                 T entity = ReflectionUtils.getNewInstance(entityClass);
                 addInitialized(entity, id, initialized);
@@ -315,22 +316,6 @@ public final class DatabaseUtils {
             }
         }
         return entity;
-    }
-
-    public static ResultSet executeQuery(String query) throws SQLException {
-        return DatabaseManager.getSingleton().getConnection().createStatement().executeQuery(query);
-    }
-
-    public static ResultSet executeQuery(Query query) throws SQLException {
-        return executeQuery(query.toRawString());
-    }
-
-    public static Integer executeUpdate(String query) throws SQLException {
-        return DatabaseManager.getSingleton().getConnection().createStatement().executeUpdate(query);
-    }
-
-    public static Integer executeUpdate(Query query) throws SQLException {
-        return executeUpdate(query.toRawString());
     }
 
     private DatabaseUtils() {

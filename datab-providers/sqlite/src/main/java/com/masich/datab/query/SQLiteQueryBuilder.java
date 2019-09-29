@@ -2,12 +2,12 @@ package com.masich.datab.query;
 
 public class SQLiteQueryBuilder extends SQLQuery.Builder {
     public SQLiteQueryBuilder createTableIfNotExists(String tableName) {
-        this.appendQuery("CREATE TABLE IF NOT EXISTS").appendQuery(tableName);
+        this.appendRawQuery("CREATE TABLE IF NOT EXISTS").appendRawQuery(tableName);
         return this;
     }
 
     public SQLiteQueryBuilder dropTableIfExists(String tableName) {
-        this.appendQuery("DROP TABLE IF EXISTS").appendQuery(tableName);
+        this.appendRawQuery("DROP TABLE IF EXISTS").appendRawQuery(tableName);
         return this;
     }
 }

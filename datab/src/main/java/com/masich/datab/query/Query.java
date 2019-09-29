@@ -1,44 +1,22 @@
 package com.masich.datab.query;
 
-public abstract class Query {
-    private String rawString;
+import java.util.ArrayList;
+import java.util.List;
 
-    public Query(String rawString) {
-        this.rawString = rawString;
-    }
+public interface Query {
+    String getRawQuery();
 
-    public String toRawString() {
-        return rawString;
-    }
+    List<Object> getQueryParams();
 
-    public abstract static class Builder<T extends Query> {
+    abstract class Builder<T extends Query> {
         protected StringBuffer rawQuery;
+        protected List<Object> queryParams;
 
         public Builder() {
-            this.rawQuery = new StringBuffer();
-        }
-
-        public Builder(String initialQuery) {
-            this.rawQuery = new StringBuffer(initialQuery);
+            rawQuery = new StringBuffer();
+            queryParams = new ArrayList<>();
         }
 
         public abstract T build();
-    }
-
-
-    public static abstract class QueryPart extends Query {
-        public QueryPart(String rawString) {
-            super(rawString);
-        }
-
-        public static abstract class Builder<T extends QueryPart> extends Query.Builder<T> {
-            public Builder() {
-                super();
-            }
-
-            public Builder(String initialPart) {
-                super(initialPart);
-            }
-        }
     }
 }

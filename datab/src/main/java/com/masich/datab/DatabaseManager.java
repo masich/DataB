@@ -4,11 +4,13 @@ import com.masich.datab.converter.Converter;
 import com.masich.datab.provider.DatabaseProvider;
 import com.masich.datab.provider.SQLQueryProvider;
 import com.masich.datab.provider.attributes.TableAttributes;
+import com.masich.datab.query.Query;
 import com.masich.datab.query.SQLQuery;
 import com.masich.datab.utils.ReflectionUtils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
@@ -100,6 +102,14 @@ public final class DatabaseManager implements SQLQueryProvider, DatabaseProvider
     public void finishTransaction() throws SQLException {
         dbConnection.commit();
         dbConnection.setAutoCommit(true);
+    }
+
+    public ResultSet executeQuery(Query query) throws SQLException {
+        return getDatabaseProvider().executeQuery(getConnection(), query);
+    }
+
+    public Integer executeUpdate(Query query) throws SQLException {
+        return getDatabaseProvider().executeUpdate(getConnection(), query);
     }
 
     private Connection getNewConnection(String dbSrc) throws SQLException {
