@@ -6,11 +6,11 @@ import com.masich.datab.provider.attributes.TableAttributes;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public interface DBProvider {
+public interface DatabaseProvider {
     /**
      * @return Database scheme prefix in <code>jdbc:DB_SCHEME:</code> format
      */
-    String getDBStringPrefix();
+    String getDatabaseStringPrefix();
 
     /**
      * Method that initializes particular tables in the database.
@@ -22,7 +22,7 @@ public interface DBProvider {
      * @param tablesAttributes A data structure that contains Entity table attributes to initialize in the database instance
      * @throws SQLException An exception that could occur during database initialization
      */
-    void initDB(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException;
+    void initDatabase(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException;
 
     /**
      * Method that drops particular tables in the database.
@@ -31,7 +31,7 @@ public interface DBProvider {
      * @param tablesAttributes A data structure that contains Entity table attributes to drop in the database instance
      * @throws SQLException An exception that could occur during database drop
      */
-    void dropDB(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException;
+    void dropDatabase(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException;
 
     /**
      * @param dbSrc A database source path
@@ -60,6 +60,6 @@ public interface DBProvider {
     DataType.Converter getDataTypeConverter();
 
     interface Factory {
-        DBProvider getDBProvider();
+        DatabaseProvider getDatabaseProvider();
     }
 }

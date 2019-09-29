@@ -1,12 +1,12 @@
 package com.masich.datab.provider;
 
-public class SQLiteProviderFactory implements com.masich.datab.provider.DBProvider.Factory {
-    protected DBProvider DBProvider;
+public class SQLiteProviderFactory implements DatabaseProvider.Factory {
+    protected DatabaseProvider DatabaseProvider;
 
     @Override
-    public DBProvider getDBProvider() {
-        if (DBProvider == null)
-            DBProvider = new SQLiteProvider();
-        return DBProvider;
+    public DatabaseProvider getDatabaseProvider() {
+        if (DatabaseProvider == null)
+            DatabaseProvider = new SQLiteProvider();
+        return DatabaseProvider;
     }
 }

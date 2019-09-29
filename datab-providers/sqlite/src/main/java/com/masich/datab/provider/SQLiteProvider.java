@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class SQLiteProvider implements DBProvider {
+public class SQLiteProvider implements DatabaseProvider {
     private SQLiteQueryProvider sqlQueryProvider;
     private SQLiteDataTypeConverter dataTypeConverter;
 
@@ -23,19 +23,19 @@ public class SQLiteProvider implements DBProvider {
     }
 
     @Override
-    public String getDBStringPrefix() {
+    public String getDatabaseStringPrefix() {
         return JDBC.PREFIX;
     }
 
     @Override
-    public void initDB(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException {
+    public void initDatabase(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException {
         for (TableAttributes tableAttributes : tablesAttributes) {
             createTableIfNotExists(dbConnection, tableAttributes);
         }
     }
 
     @Override
-    public void dropDB(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException {
+    public void dropDatabase(Connection dbConnection, Iterable<TableAttributes> tablesAttributes) throws SQLException {
         for (TableAttributes tableAttributes : tablesAttributes) {
             dropTableIfExists(dbConnection, tableAttributes.getTableName());
         }
@@ -68,9 +68,9 @@ public class SQLiteProvider implements DBProvider {
     }
 
     private String dbStringFromSource(String dbSrc) {
-        if (dbSrc.startsWith(getDBStringPrefix()))
+        if (dbSrc.startsWith(getDatabaseStringPrefix()))
             return dbSrc;
-        return getDBStringPrefix() + dbSrc;
+        return getDatabaseStringPrefix() + dbSrc;
     }
 
     void createTableIfNotExists(Connection connection, TableAttributes tableAttributes) throws SQLException {

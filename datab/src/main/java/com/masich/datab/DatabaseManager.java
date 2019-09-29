@@ -1,7 +1,7 @@
 package com.masich.datab;
 
 import com.masich.datab.converter.Converter;
-import com.masich.datab.provider.DBProvider;
+import com.masich.datab.provider.DatabaseProvider;
 import com.masich.datab.provider.SQLQueryProvider;
 import com.masich.datab.provider.attributes.TableAttributes;
 import com.masich.datab.query.SQLQuery;
@@ -13,13 +13,13 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-public final class DatabaseManager implements SQLQueryProvider, DBProvider.Factory, Converter.Factory {
+public final class DatabaseManager implements SQLQueryProvider, DatabaseProvider.Factory, Converter.Factory {
     private static DatabaseManager managerInstance;
     private String databaseSrc;
     private String entityPackageName = "";
     private Connection dbConnection;
     private Converter.Factory converterFactory;
-    private DBProvider.Factory providerFactory;
+    private DatabaseProvider.Factory providerFactory;
 
     private DatabaseManager() {
     }
@@ -32,7 +32,7 @@ public final class DatabaseManager implements SQLQueryProvider, DBProvider.Facto
         this.databaseSrc = databaseSrc;
         this.dbConnection = getNewConnection(databaseSrc);
         this.entityPackageName = entityPackageName;
-        initDB();
+        initDatabase();
     }
 
     public static DatabaseManager getSingleton() {
@@ -43,16 +43,16 @@ public final class DatabaseManager implements SQLQueryProvider, DBProvider.Facto
         managerInstance = databaseManager;
     }
 
-    public void initDB() throws SQLException {
+    public void initDatabase() throws SQLException {
         Set<Class<? extends Entity>> entityClasses = ReflectionUtils.getAllSubclassesByPackage(entityPackageName, Entity.class);
         List<TableAttributes> tableAttributesList = TableAttributes.fromEntityClasses(entityClasses);
-        providerFactory.getDBProvider().initDB(getConnection(), tableAttributesList);
+        providerFactory.getDatabaseProvider().initDatabase(getConnection(), tableAttributesList);
     }
 
-    public void dropDB() throws SQLException {
+    public void dropDatabase() throws SQLException {
         Set<Class<? extends Entity>> entityClasses = ReflectionUtils.getAllSubclassesByPackage(entityPackageName, Entity.class);
         List<TableAttributes> tableAttributesList = TableAttributes.fromEntityClasses(entityClasses);
-        providerFactory.getDBProvider().dropDB(getConnection(), tableAttributesList);
+        providerFactory.getDatabaseProvider().dropDatabase(getConnection(), tableAttributesList);
     }
 
     public Connection getConnection() throws SQLException {
@@ -85,7 +85,7 @@ public final class DatabaseManager implements SQLQueryProvider, DBProvider.Facto
         this.converterFactory = converterFactory;
     }
 
-    public void setProviderFactory(DBProvider.Factory providerFactory) {
+    public void setProviderFactory(DatabaseProvider.Factory providerFactory) {
         this.providerFactory = providerFactory;
     }
 
@@ -108,17 +108,17 @@ public final class DatabaseManager implements SQLQueryProvider, DBProvider.Facto
 
     @Override
     public SQLQuery.Builder getSQLQueryBuilder() {
-        return getDBProvider().getSQLQueryProvider().getSQLQueryBuilder();
+        return getDatabaseProvider().getSQLQueryProvider().getSQLQueryBuilder();
     }
 
     @Override
     public SQLQuery.Chain.Builder getSQLQueryChainBuilder() {
-        return getDBProvider().getSQLQueryProvider().getSQLQueryChainBuilder();
+        return getDatabaseProvider().getSQLQueryProvider().getSQLQueryChainBuilder();
     }
 
     @Override
     public SQLQuery.Condition.Builder getSQLQueryConditionBuilder() {
-        return getDBProvider().getSQLQueryProvider().getSQLQueryConditionBuilder();
+        return getDatabaseProvider().getSQLQueryProvider().getSQLQueryConditionBuilder();
     }
 
     private Connection getNewConnection(String dbSrc, String login, String password) throws SQLException {
@@ -126,8 +126,8 @@ public final class DatabaseManager implements SQLQueryProvider, DBProvider.Facto
     }
 
     @Override
-    public DBProvider getDBProvider() {
-        return providerFactory.getDBProvider();
+    public DatabaseProvider getDatabaseProvider() {
+        return providerFactory.getDatabaseProvider();
     }
 
     public static class Builder {
@@ -152,7 +152,7 @@ public final class DatabaseManager implements SQLQueryProvider, DBProvider.Facto
             return this;
         }
 
-        public Builder addProviderFactory(DBProvider.Factory providerFactory) {
+        public Builder addProviderFactory(DatabaseProvider.Factory providerFactory) {
             this.databaseManager.setProviderFactory(providerFactory);
             return this;
         }
@@ -161,11 +161,11 @@ public final class DatabaseManager implements SQLQueryProvider, DBProvider.Facto
             if (databaseManager.providerFactory == null) {
                 throw new NullPointerException("ProviderFactory cannot be null. Please, provide it by using addProviderFactory() method");
             }
-            String dbPrefix = databaseManager.providerFactory.getDBProvider().getDBStringPrefix();
+            String dbPrefix = databaseManager.providerFactory.getDatabaseProvider().getDatabaseStringPrefix();
             if (!databaseManager.databaseSrc.startsWith(dbPrefix)) {
                 databaseManager.databaseSrc = dbPrefix + databaseManager.databaseSrc;
             }
-            databaseManager.initDB();
+            databaseManager.initDatabase();
             return databaseManager;
         }
     }

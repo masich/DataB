@@ -15,7 +15,7 @@ public class SQLiteAndroidProvider extends SQLiteProvider {
     }
 
     @Override
-    public String getDBStringPrefix() {
+    public String getDatabaseStringPrefix() {
         return SQLDroidDriver.sqldroidPrefix;
     }
 }

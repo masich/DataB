@@ -2,9 +2,9 @@ package com.masich.datab.provider;
 
 public class SQLiteAndroidProviderFactory extends SQLiteProviderFactory {
     @Override
-    public com.masich.datab.provider.DBProvider getDBProvider() {
-        if (DBProvider == null)
-            DBProvider = new SQLiteAndroidProvider();
-        return DBProvider;
+    public DatabaseProvider getDatabaseProvider() {
+        if (DatabaseProvider == null)
+            DatabaseProvider = new SQLiteAndroidProvider();
+        return DatabaseProvider;
     }
 }
